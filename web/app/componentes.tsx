@@ -5,14 +5,17 @@ import {
   rotuloFaixa,
   type Agregado,
   type Candidata,
+  type Distancia,
   type Faixa,
 } from "@/lib/creche";
 import {
   IconeAtencao,
+  IconeCasa,
   IconeConfirmado,
   IconeEscola,
   IconeEstrela,
   IconeInfo,
+  IconeLocal,
   IconePerto,
   IconeTurno,
 } from "./icones";
@@ -288,6 +291,10 @@ export function CardEscola({
         {c.aproximada && <span className="text-discreto">· local aproximado</span>}
       </p>
 
+      {/* Com dois pontos de referência, o chip de cima diz só a menor distância. Aqui a
+          família vê qual das duas ela é, e quanto custa o outro trajeto. */}
+      {c.distancias.length > 1 && <ListaDeDistancias distancias={c.distancias} />}
+
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <ChipChance faixa={c.faixa} />
         <Chip tom="categoria">
@@ -320,6 +327,27 @@ export function CardEscola({
         )}
       </div>
     </li>
+  );
+}
+
+/**
+ * Distância da unidade até cada ponto de referência, na ordem em que a família os
+ * informou: a casa primeiro, depois o outro lugar importante.
+ */
+export function ListaDeDistancias({ distancias }: { distancias: Distancia[] }) {
+  return (
+    <ul className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-body-sm text-apoio">
+      {distancias.map((d, i) => (
+        <li key={d.ponto} className="flex items-center gap-1.5">
+          {i === 0 ? (
+            <IconeCasa size={14} className="shrink-0 text-discreto" />
+          ) : (
+            <IconeLocal size={14} className="shrink-0 text-discreto" />
+          )}
+          <span className="num">{km(d.km)}</span> de {nomeExibicao(d.bairro)}
+        </li>
+      ))}
+    </ul>
   );
 }
 

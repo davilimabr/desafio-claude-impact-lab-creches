@@ -33,6 +33,12 @@ export const ANOS_HISTORICO = 3;
 export const MAX_OPCOES = 5;
 
 /**
+ * A primeira tela depois de entrar. Fica numa constante porque a tela de entrada, a
+ * marca, a navegação e os links de volta de três telas apontam todos para ela.
+ */
+export const INICIO = "/minhas-escolhas";
+
+/**
  * A residência da família é dado do cadastro, não escolha de formulário: no processo
  * real ela é comprovada por documento. Fica aqui só para a demonstração ter um ponto
  * de partida; as telas aceitam outro pela URL.
@@ -188,6 +194,8 @@ export function distanciaKm(bairroFamilia: string, unidade: string): number | nu
 export const PESOS = { proximidade: 0.4, ociosidade: 0.4, estabilidade: 0.2 };
 export const RAIO_PADRAO_KM = 3;
 
+export type Distancia = { ponto: string; bairro: string; km: number };
+
 export type Candidata = {
   unidade: string;
   nome: string;
@@ -196,6 +204,12 @@ export type Candidata = {
   distanciaKm: number;
   /** de qual ponto de referência ela está mais perto */
   pontoMaisProximo: string;
+  /**
+   * Distância até cada ponto de referência, na ordem em que a família os informou: a
+   * casa primeiro. Com dois pontos, só a menor distância esconde de qual deles a creche
+   * está perto — e é isso que decide se ela serve para a ida ou para a volta.
+   */
+  distancias: Distancia[];
   agregado: Agregado;
   faixa: Faixa;
   score: number;
@@ -229,16 +243,19 @@ export function candidatas(opts: {
   for (const s of slots) {
     if (s.a !== ANO || s.g !== grupamento || s.h !== horario) continue;
 
-    let melhor = Infinity;
-    let origem = pontos[0];
+    const distancias: Distancia[] = [];
     for (const p of pontos) {
       const d = distanciaKm(p, s.u);
-      if (d !== null && d < melhor) {
-        melhor = d;
-        origem = p;
-      }
+      if (d !== null) distancias.push({ ponto: p, bairro: bairros[p].nome, km: d });
     }
-    if (melhor > raio) continue;
+
+    // O raio vale para o ponto mais perto: a creche entra na lista se serve a um dos
+    // pontos, e a distância até o outro fica à vista para a família decidir.
+    const maisPerto = distancias.reduce<Distancia | null>(
+      (a, b) => (a === null || b.km < a.km ? b : a),
+      null,
+    );
+    if (!maisPerto || maisPerto.km > raio) continue;
 
     const ag = agregado(s.u, grupamento, horario);
     if (!ag) continue;
@@ -246,7 +263,7 @@ export function candidatas(opts: {
     // Sem histórico de chamada não há como afirmar que a vaga existe.
     if (ag.profundidadeMediana <= 0 && ag.confirmadosAtual === 0) continue;
 
-    const proximidade = 1 - melhor / raio;
+    const proximidade = 1 - maisPerto.km / raio;
     const denom = Math.max(1, ag.profundidadeMediana);
     const ociosidade = Math.max(0, 1 - ag.filaAtual / denom);
     const estabilidade = ag.anosObservados ? ag.anosComFilaZero / ag.anosObservados : 0;
@@ -255,8 +272,9 @@ export function candidatas(opts: {
       unidade: s.u,
       nome: unidades[s.u]?.n ?? s.u,
       bairro: unidades[s.u]?.b ?? null,
-      distanciaKm: melhor,
-      pontoMaisProximo: origem,
+      distanciaKm: maisPerto.km,
+      pontoMaisProximo: maisPerto.ponto,
+      distancias,
       agregado: ag,
       faixa: faixaDeChance(ag),
       score:

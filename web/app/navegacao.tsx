@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { INICIO } from "@/lib/creche";
 import { IconeBusca, IconeEscola, IconeGrafico, IconeLista } from "./icones";
 
 /**
@@ -12,7 +13,7 @@ import { IconeBusca, IconeEscola, IconeGrafico, IconeLista } from "./icones";
  * lugar nenhum e promessa quebrada: melhor uma barra curta e honesta.
  */
 const ITENS = [
-  { href: "/", rotulo: "Minhas escolhas", Icone: IconeLista, exato: true },
+  { href: INICIO, rotulo: "Minhas escolhas", Icone: IconeLista, exato: true },
   { href: "/escolas", rotulo: "Escolas", Icone: IconeEscola, exato: false },
   { href: "/diagnostico", rotulo: "Diagnóstico da rede", Icone: IconeGrafico, exato: false },
 ];

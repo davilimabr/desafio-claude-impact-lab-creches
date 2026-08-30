@@ -13,6 +13,7 @@ import {
   ofertaDaUnidade,
   tipoDaUnidade,
   unidades,
+  type Distancia,
 } from "@/lib/creche";
 import { mapaDisponivel, urlMapaEstatico, type Pino } from "@/lib/mapa";
 import {
@@ -24,7 +25,7 @@ import {
   explicacaoDaChance,
   km,
   n,
-} from "../../componentes";
+} from "../../../componentes";
 import {
   IconeAtencao,
   IconeAvancar,
@@ -34,8 +35,8 @@ import {
   IconePerto,
   IconeRemover,
   IconeTurno,
-} from "../../icones";
-import { ImagemDoMapa } from "../../mapa";
+} from "../../../icones";
+import { ImagemDoMapa } from "../../../mapa";
 
 const um = (v: string | string[] | undefined) => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
@@ -82,9 +83,15 @@ export default async function DetalheDaUnidade({
   const oferta = ofertaDaUnidade(id);
   const ag = agregado(id, grupamento, turno);
   const faixa = ag ? faixaDeChance(ag) : null;
-  const distancia = distanciaKm(bairro, id);
   const casa = bairros[bairro];
   const coord = coordenadaDaUnidade(id);
+
+  // Uma linha por ponto de referência da família, a casa primeiro. Sem o segundo ponto
+  // a lista tem um item e a tela fica igual à de antes.
+  const distancias = [
+    { ponto: bairro, bairro: casa?.nome ?? bairro, km: distanciaKm(bairro, id) },
+    ...(ref2 ? [{ ponto: ref2, bairro: bairros[ref2].nome, km: distanciaKm(ref2, id) }] : []),
+  ].filter((d): d is Distancia => d.km !== null);
 
   const naLista = opcoes.includes(id);
   const restantes = MAX_OPCOES - opcoes.length;
@@ -92,6 +99,10 @@ export default async function DetalheDaUnidade({
   const pinos: Pino[] = [];
   if (coord) pinos.push({ ...coord, tom: "selecionado" });
   if (casa) pinos.push({ lat: casa.lat, lng: casa.lng, rotulo: "C", tom: "casa" });
+  if (ref2) {
+    const r = bairros[ref2];
+    pinos.push({ lat: r.lat, lng: r.lng, rotulo: "R", tom: "casa" });
+  }
   const mapa = (await mapaDisponivel())
     ? urlMapaEstatico(pinos, { largura: 640, altura: 300 })
     : null;
@@ -127,12 +138,15 @@ export default async function DetalheDaUnidade({
                 <IconeLocal size={18} className="shrink-0" />
                 {unidade.b ? nomeExibicao(unidade.b) : "Bairro não informado"}
                 {unidade.cre && <span className="text-discreto">· CRE {unidade.cre}</span>}
-                {distancia !== null && (
-                  <span className="num rounded-sm bg-primaria-clara px-2 py-0.5 text-label-md text-primaria">
+                {distancias.map((d) => (
+                  <span
+                    key={d.ponto}
+                    className="num rounded-sm bg-primaria-clara px-2 py-0.5 text-label-md text-primaria"
+                  >
                     {unidade.geo === "unidade" ? "" : "cerca de "}
-                    {km(distancia)} de {casa?.nome ?? bairro}
+                    {km(d.km)} de {nomeExibicao(d.bairro)}
                   </span>
-                )}
+                ))}
               </p>
 
               <div className="mt-3 flex flex-wrap gap-1.5">
@@ -162,12 +176,19 @@ export default async function DetalheDaUnidade({
           <section className="rounded-lg border border-linha bg-papel p-5">
             <h2 className="text-title-lg text-titulo">Localização</h2>
             <p className="mt-1 text-body-sm text-apoio">
-              A unidade em azul-marinho e o centro do seu bairro marcado com <strong>C</strong>.
+              A unidade em azul-marinho e o centro do seu bairro marcado com <strong>C</strong>
+              {ref2 && (
+                <>
+                  . O outro lugar importante, {nomeExibicao(bairros[ref2].nome)}, está marcado com{" "}
+                  <strong>R</strong>
+                </>
+              )}
+              .
             </p>
             <div className="mt-3 h-56 overflow-hidden rounded-xl border border-linha bg-fundo">
               <ImagemDoMapa
                 src={mapa}
-                alt={`Mapa com a localização de ${nomeExibicao(unidade.n)} e o centro do bairro ${casa?.nome ?? bairro}.`}
+                alt={`Mapa com a localização de ${nomeExibicao(unidade.n)}, o centro do bairro ${nomeExibicao(casa?.nome ?? bairro)}${ref2 ? ` e o centro do bairro ${nomeExibicao(bairros[ref2].nome)}` : ""}.`}
                 alternativa={
                   <div className="flex h-full flex-col items-center justify-center gap-2 p-5 text-center">
                     <IconeLocal size={28} className="text-desabilitado" />

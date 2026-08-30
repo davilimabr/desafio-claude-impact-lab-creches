@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   FAMILIA_DEMO,
+  INICIO,
   MAX_OPCOES,
   RAIO_PADRAO_KM,
   bairros,
@@ -11,9 +12,9 @@ import {
   type Faixa,
 } from "@/lib/creche";
 import { mapaDisponivel, urlMapaEstatico, type Pino } from "@/lib/mapa";
-import { BOTAO, CardEscola, ChipFiltro, EstadoVazio, km, n } from "../componentes";
-import { IconeBusca, IconeCasa, IconeEstrela, IconePerto } from "../icones";
-import { ImagemDoMapa } from "../mapa";
+import { BOTAO, CardEscola, ChipFiltro, EstadoVazio, km, n } from "../../componentes";
+import { IconeBusca, IconeCasa, IconeEstrela, IconeLocal, IconePerto } from "../../icones";
+import { ImagemDoMapa } from "../../mapa";
 
 export const metadata = {
   title: "Escolas · Inscrição Creche Rio",
@@ -112,7 +113,8 @@ export default async function Escolas({ searchParams }: PageProps<"/escolas">) {
     : undefined;
 
   const restantes = MAX_OPCOES - opcoes.length;
-  const pinos = montaPinos(visiveis, casa);
+  const outro = ref2 ? bairros[ref2] : undefined;
+  const pinos = montaPinos(visiveis, casa, outro);
   const mapa = (await mapaDisponivel())
     ? urlMapaEstatico(pinos, { largura: 640, altura: 620 })
     : null;
@@ -124,9 +126,9 @@ export default async function Escolas({ searchParams }: PageProps<"/escolas">) {
         <h1 className="text-headline-md text-titulo">Escolas recomendadas</h1>
         <p className="mt-1 text-body-sm text-apoio">
           {grupamento} · turno {turno.toLowerCase()} · até {RAIO_PADRAO_KM} km de{" "}
-          {casa?.nome ?? bairro}
-          {ref2 && <> e de {bairros[ref2]?.nome}</>}.{" "}
-          <Link href="/" className="text-primaria underline-offset-4 hover:underline">
+          {nomeExibicao(casa?.nome ?? bairro)}
+          {outro && <> e de {nomeExibicao(outro.nome)}</>}.{" "}
+          <Link href={INICIO} className="text-primaria underline-offset-4 hover:underline">
             Trocar turma ou turno
           </Link>
         </p>
@@ -191,7 +193,7 @@ export default async function Escolas({ searchParams }: PageProps<"/escolas">) {
             <span className="num font-semibold text-tinta">{n(filtradas.length)}</span>{" "}
             {filtradas.length === 1 ? "creche encontrada" : "creches encontradas"}
           </span>
-          <Link href="/" className="text-primaria underline-offset-4 hover:underline">
+          <Link href={INICIO} className="text-primaria underline-offset-4 hover:underline">
             <span className="num">{opcoes.length}</span> de {MAX_OPCOES} escolhas usadas
           </Link>
         </p>
@@ -276,8 +278,14 @@ export default async function Escolas({ searchParams }: PageProps<"/escolas">) {
         <div className="relative h-72 overflow-hidden rounded-xl border border-linha bg-papel sm:h-96 lg:h-full">
           <ImagemDoMapa
             src={mapa}
-            alt={`Mapa com ${visiveis.length} creches desta página e o centro do bairro ${casa?.nome ?? bairro}.`}
-            alternativa={<PainelSemMapa visiveis={visiveis} bairroCasa={casa?.nome ?? bairro} />}
+            alt={`Mapa com ${visiveis.length} creches desta página, o centro do bairro ${nomeExibicao(casa?.nome ?? bairro)}${outro ? ` e o centro do bairro ${nomeExibicao(outro.nome)}` : ""}.`}
+            alternativa={
+              <PainelSemMapa
+                visiveis={visiveis}
+                bairroCasa={nomeExibicao(casa?.nome ?? bairro)}
+                bairroOutro={outro ? nomeExibicao(outro.nome) : null}
+              />
+            }
           />
 
           <div className="pointer-events-none absolute bottom-3 left-3 right-3 rounded-lg bg-papel/95 p-3 shadow-md">
@@ -295,6 +303,11 @@ export default async function Escolas({ searchParams }: PageProps<"/escolas">) {
               <li className="flex items-center gap-1.5">
                 <IconeCasa size={14} className="text-primaria" /> C: centro do seu bairro
               </li>
+              {outro && (
+                <li className="flex items-center gap-1.5">
+                  <IconeLocal size={14} className="text-primaria" /> R: {nomeExibicao(outro.nome)}
+                </li>
+              )}
             </ul>
             <p className="mt-1.5 text-body-sm text-discreto">
               Os números dos pins são os mesmos da lista ao lado. A distância é medida do centro do
@@ -311,9 +324,14 @@ function Bolinha({ cor }: { cor: string }) {
   return <span aria-hidden className={`inline-block h-2.5 w-2.5 rounded-full ${cor}`} />;
 }
 
-function montaPinos(visiveis: Candidata[], casa: { lat: number; lng: number } | undefined) {
+function montaPinos(
+  visiveis: Candidata[],
+  casa: { lat: number; lng: number } | undefined,
+  outro: { lat: number; lng: number } | undefined,
+) {
   const pinos: Pino[] = [];
   if (casa) pinos.push({ lat: casa.lat, lng: casa.lng, rotulo: "C", tom: "casa" });
+  if (outro) pinos.push({ lat: outro.lat, lng: outro.lng, rotulo: "R", tom: "casa" });
   visiveis.forEach((c, i) => {
     const coord = coordenadaDaUnidade(c.unidade);
     if (coord) pinos.push({ ...coord, rotulo: String(i + 1), tom: TOM_DO_PIN[c.faixa] });
@@ -325,13 +343,18 @@ function montaPinos(visiveis: Candidata[], casa: { lat: number; lng: number } | 
 function PainelSemMapa({
   visiveis,
   bairroCasa,
+  bairroOutro,
 }: {
   visiveis: Candidata[];
   bairroCasa: string;
+  bairroOutro: string | null;
 }) {
   return (
     <div className="h-full overflow-auto p-5 pb-32">
-      <p className="text-title-sm text-titulo">Distância a partir de {bairroCasa}</p>
+      <p className="text-title-sm text-titulo">
+        Distância a partir de {bairroCasa}
+        {bairroOutro && <> e de {bairroOutro}</>}
+      </p>
       <p className="mt-1 text-body-sm text-apoio">
         O mapa não está disponível agora. Estas são as creches desta página, da mais perto para a
         mais longe.
@@ -341,12 +364,22 @@ function PainelSemMapa({
           .map((c, i) => ({ c, pino: i + 1 }))
           .sort((a, b) => a.c.distanciaKm - b.c.distanciaKm)
           .map(({ c, pino }) => (
-            <li key={c.unidade} className="flex items-center gap-3 border-b border-linha pb-2">
+            <li key={c.unidade} className="flex items-start gap-3 border-b border-linha pb-2">
               <span className="num flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-marinho text-label-md text-white">
                 {pino}
               </span>
               <span className="min-w-0 flex-1 truncate text-body-md text-tinta">{nomeExibicao(c.nome)}</span>
-              <span className="num shrink-0 text-body-sm text-apoio">{km(c.distanciaKm)}</span>
+              {/* Com dois pontos, uma distância por linha: o número solto não diria de qual. */}
+              <span className="shrink-0 text-right text-body-sm text-apoio">
+                {c.distancias.map((d) => (
+                  <span key={d.ponto} className="block">
+                    <span className="num">{km(d.km)}</span>
+                    {c.distancias.length > 1 && (
+                      <span className="text-discreto"> de {nomeExibicao(d.bairro)}</span>
+                    )}
+                  </span>
+                ))}
+              </span>
             </li>
           ))}
       </ol>

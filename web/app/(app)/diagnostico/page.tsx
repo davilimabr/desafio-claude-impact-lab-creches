@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ANO, meta, stats } from "@/lib/creche";
-import { BOTAO, n } from "../componentes";
-import { IconeVoltar } from "../icones";
+import { ANO, INICIO, meta, stats } from "@/lib/creche";
+import { BOTAO, n } from "../../componentes";
+import { IconeVoltar } from "../../icones";
 
 // Tela de evidência, para a SME e para a apresentação, não para a família.
 // Tudo aqui é contagem sobre os processos reais de 2021 a 2025, reproduzível com
@@ -161,7 +161,7 @@ export default function Diagnostico() {
       </Secao>
 
       <footer className="mt-8 border-t border-linha pt-6">
-        <Link href="/" className={BOTAO.contorno}>
+        <Link href={INICIO} className={BOTAO.contorno}>
           <IconeVoltar size={18} />
           Voltar para as minhas escolhas
         </Link>
