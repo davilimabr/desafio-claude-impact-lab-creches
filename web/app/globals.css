@@ -1,26 +1,62 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Ferramenta de serviço público lida no celular, muitas vezes com pressa e no sol.
+   Contraste alto, alvos grandes, nada de cinza-sobre-cinza. */
+@theme {
+  --color-tinta: #16324f; /* azul-tinta de carimbo: texto e estrutura */
+  --color-tinta-fraca: #5a708a;
+  --color-papel: #faf8f4; /* papel de formulário */
+  --color-papel-fundo: #f2eee7;
+  --color-linha: #e0d9cd;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* sinal, não enfeite: dizem se a chamada alcança a fila */
+  --color-vaga: #0b6e4f;
+  --color-vaga-clara: #e6f2ec;
+  --color-meia: #97701f;
+  --color-meia-clara: #f7efdc;
+  --color-espera: #9c3d18;
+  --color-espera-clara: #fbeae1;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--fonte-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--fonte-corpo), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-papel-fundo);
+  color: var(--color-tinta);
+  font-family: var(--font-sans);
+}
+
+/* Números são a matéria-prima desta tela: sempre tabulares, para as colunas baterem. */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Foco visível de verdade — teclado e leitor de tela são parte do piso de qualidade. */
+:where(a, button, select, summary, input):focus-visible {
+  outline: 2px solid var(--color-tinta);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+summary {
+  cursor: pointer;
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* O triângulo que gira ao abrir a ficha. */
+.seta {
+  transition: transform 160ms ease;
+}
+details[open] .seta {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seta {
+    transition: none;
+  }
 }

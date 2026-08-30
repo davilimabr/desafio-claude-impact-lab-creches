@@ -6,7 +6,7 @@ import { ANO, meta, stats } from "@/lib/creche";
 // `node scripts/ingest.mjs`. Nada é estimativa ou projeção.
 
 export const metadata = {
-  title: "Diagnóstico · Copiloto da Família",
+  title: "Diagnóstico da rede · Inscrição Creche Rio",
   description: "O descompasso entre a fila e a vaga ociosa na rede de creches do Rio",
 };
 
@@ -28,22 +28,22 @@ function Numero({
   return (
     <div
       className={`rounded-xl border p-5 ${
-        destaque ? "border-rose-300 bg-rose-50" : "border-slate-200 bg-white"
+        destaque ? "border-espera bg-espera-clara" : "border-linha bg-papel"
       }`}
     >
       <p
-        className={`text-3xl font-semibold tabular-nums ${
-          destaque ? "text-rose-800" : "text-slate-900"
+        className={`num font-display text-4xl font-bold leading-none ${
+          destaque ? "text-espera" : "text-tinta"
         }`}
       >
         {n(valor)}
-        {de && (
-          <span className="ml-2 text-base font-normal text-slate-500">
-            de {n(de)} · {pct(valor, de)}
-          </span>
-        )}
       </p>
-      <p className="mt-2 text-sm leading-relaxed text-slate-600">{children}</p>
+      {de && (
+        <p className="num mt-1 text-sm text-tinta-fraca">
+          de {n(de)} · {pct(valor, de)}
+        </p>
+      )}
+      <p className="mt-3 text-[15px] leading-relaxed text-tinta">{children}</p>
     </div>
   );
 }
@@ -52,15 +52,16 @@ export default function Diagnostico() {
   const s = stats;
 
   return (
-    <main className="mx-auto max-w-3xl px-5 py-10">
+    <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
       <header className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-          Copiloto da Família · evidência
+        <p className="font-display text-xs font-bold uppercase tracking-[0.2em] text-tinta-fraca">
+          Evidência
         </p>
-        <h1 className="mt-1 text-2xl font-semibold text-slate-900">
-          A fila não é só escassez. É descompasso.
+        <h1 className="mt-2 font-display text-[28px] font-bold leading-[1.15] tracking-tight text-tinta sm:text-4xl">
+          A fila não é só escassez.
+          <br />É descompasso.
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-slate-600">
+        <p className="mt-3 max-w-prose text-[15px] leading-relaxed text-tinta">
           Contagens sobre o processo de Inscrição Creche de {ANO} da SME-Rio. Não são estimativas
           nem projeções: são contagens diretas nas bases, reproduzíveis com um comando.
         </p>
@@ -76,7 +77,7 @@ export default function Diagnostico() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-widest text-tinta-fraca">
           O cruzamento que ninguém faz
         </h2>
         <div className="grid gap-3">
@@ -93,51 +94,49 @@ export default function Diagnostico() {
             escolhas; elas não gastaram todas — e a vaga que serviria estava ali.
           </Numero>
         </div>
-        <p className="mt-3 text-sm leading-relaxed text-slate-600">
+        <p className="mt-4 border-l-4 border-tinta pl-4 font-display text-lg font-semibold leading-snug text-tinta">
           Não falta vaga para essas famílias. Falta a informação de onde ela está — e é a própria
           prefeitura que já a tem.
         </p>
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-widest text-tinta-fraca">
           Como o número é medido
         </h2>
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-linha bg-papel">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-slate-600">
+            <thead className="border-b border-linha text-left text-tinta-fraca">
               <tr>
-                <th className="px-4 py-2 font-medium">Critério de proximidade</th>
-                <th className="px-4 py-2 text-right font-medium">Crianças</th>
+                <th className="px-4 py-2.5 font-semibold">Critério de proximidade</th>
+                <th className="px-4 py-2.5 text-right font-semibold">Crianças</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              <tr className="bg-white">
-                <td className="px-4 py-2">
-                  <strong>Distância ≤ {s.raio_km} km</strong> — adotado, e é o que a tela usa
+            <tbody className="divide-y divide-linha">
+              <tr>
+                <td className="px-4 py-2.5">
+                  <strong>Distância até {s.raio_km} km</strong> — adotado, e é o que a tela usa
                 </td>
-                <td className="px-4 py-2 text-right font-semibold tabular-nums">
+                <td className="num px-4 py-2.5 text-right font-bold">
                   {n(s.sensibilidade.por_distancia_3km)}
                 </td>
               </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-2 text-slate-600">
-                  Mesmo bairro, pela planilha de localização
-                </td>
-                <td className="px-4 py-2 text-right tabular-nums text-slate-600">
+              <tr className="text-tinta-fraca">
+                <td className="px-4 py-2.5">Mesmo bairro, pela planilha de localização</td>
+                <td className="num px-4 py-2.5 text-right">
                   {n(s.sensibilidade.por_bairro_planilha)}
                 </td>
               </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-2 text-slate-600">Mesmo bairro, pela Query D</td>
-                <td className="px-4 py-2 text-right tabular-nums text-slate-600">
+              <tr className="text-tinta-fraca">
+                <td className="px-4 py-2.5">Mesmo bairro, pela Query D</td>
+                <td className="num px-4 py-2.5 text-right">
                   {n(s.sensibilidade.por_bairro_query_d)}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-sm leading-relaxed text-slate-600">
+        <p className="mt-3 text-sm leading-relaxed text-tinta-fraca">
           Cruzar por <em>nome de bairro</em> é frágil: as duas fontes de endereço da rede discordam
           sobre onde ficam algumas unidades, e &quot;mesmo bairro&quot; chega a emparelhar creches a
           mais de {s.raio_km} km uma da outra. Por isso o número adotado usa distância real entre
@@ -146,28 +145,35 @@ export default function Diagnostico() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-widest text-tinta-fraca">
           Premissas declaradas
         </h2>
-        <ul className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700">
+        <ul className="space-y-2.5 rounded-xl border border-linha bg-papel p-4 text-sm leading-relaxed text-tinta">
           {meta.premissas.map((p) => (
-            <li key={p} className="flex gap-2">
-              <span className="text-slate-400">—</span>
+            <li key={p} className="flex gap-2.5">
+              <span aria-hidden className="text-tinta-fraca">
+                —
+              </span>
               <span>{p}</span>
             </li>
           ))}
-          <li className="flex gap-2">
-            <span className="text-slate-400">—</span>
+          <li className="flex gap-2.5">
+            <span aria-hidden className="text-tinta-fraca">
+              —
+            </span>
             <span>
-              {s.unidades_sem_coordenada} das unidades não têm coordenada própria e herdam o centro
-              do bairro.
+              {s.unidades_sem_coordenada} unidades não têm coordenada própria e herdam o centro do
+              bairro.
             </span>
           </li>
         </ul>
       </section>
 
-      <footer className="border-t border-slate-200 pt-6 text-sm">
-        <Link href="/" className="font-medium text-slate-900 underline hover:text-slate-600">
+      <footer className="border-t border-linha pt-6">
+        <Link
+          href="/"
+          className="font-semibold text-tinta underline underline-offset-4 hover:text-tinta-fraca"
+        >
           ← Ver a tela do responsável
         </Link>
       </footer>
