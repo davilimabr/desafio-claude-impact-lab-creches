@@ -16,7 +16,7 @@ const ROTULO: Record<Faixa, string> = {
 const km = (d: number) => (d < 1 ? `${Math.round(d * 1000)} m` : `${d.toFixed(1).replace(".", ",")} km`);
 
 /**
- * A barra de alcance — o elemento que carrega a tese do produto.
+ * A barra de alcance, o elemento que carrega a tese do produto.
  * A trilha é a fila; o preenchido é até onde a chamada do ano passado chegou.
  * Uma trilha quase vazia diz, sem texto, "esta fila não anda até você".
  */
@@ -29,8 +29,8 @@ function Alcance({ fila, chamou }: { fila: number; chamou: number }) {
       role="img"
       aria-label={
         fila === 0
-          ? `Sem fila. A creche chamou ${chamou} famílias em ${ANO}.`
-          : `A creche chamou ${chamou} famílias em ${ANO}, com ${fila} na fila.`
+          ? `Ninguém na fila. Esta creche chamou ${chamou} crianças em ${ANO}.`
+          : `Esta creche chamou ${chamou} crianças em ${ANO} e tem ${fila} famílias na fila.`
       }
     >
       <div
@@ -45,17 +45,17 @@ function porQue(c: Candidata) {
   const a = c.agregado;
   const m = a.profundidadeMediana;
   if (a.filaAtual === 0) {
-    return `Não há ninguém na fila desta turma. Quem se inscrever entra direto na próxima chamada${
-      a.estavel ? `, e a creche está assim há ${a.anosComFilaZero} anos` : ""
+    return `Não há ninguém na fila desta turma. Quem se inscrever agora entra direto na próxima chamada${
+      a.estavel ? `, e esta creche está sem fila há ${a.anosComFilaZero} anos` : ""
     }.`;
   }
   if (c.faixa === "alta") {
-    return `A fila tem ${a.filaAtual} famílias e a creche costuma chamar ${m} por ano. Sobra folga: quem entra agora tende a ser chamado.`;
+    return `A fila tem ${a.filaAtual} famílias e a creche costuma chamar ${m} crianças por ano. Sobra lugar, então quem entra agora tem boa chance de ser chamado.`;
   }
   if (c.faixa === "media") {
-    return `A fila tem ${a.filaAtual} famílias e a creche costuma chamar ${m} por ano. Você fica perto do limite — pode ser chamado, mas não é garantido.`;
+    return `A fila tem ${a.filaAtual} famílias e a creche costuma chamar ${m} crianças por ano. Você fica bem perto do limite. Pode ser chamado, mas não é garantido.`;
   }
-  return `A fila tem ${a.filaAtual} famílias, e a creche costuma chamar ${m} por ano. Historicamente a chamada não chega tão fundo, então a chance de você ser chamado é pequena.`;
+  return `A fila tem ${a.filaAtual} famílias e a creche costuma chamar só ${m} crianças por ano. A chamada quase nunca chega tão longe na fila, então a sua chance de ser chamado é pequena.`;
 }
 
 export function Ficha({
@@ -73,7 +73,7 @@ export function Ficha({
   const a = c.agregado;
 
   return (
-    <li className={`border-l-4 bg-papel ${e.borda} shadow-[0_1px_0_rgba(22,50,79,0.06)]`}>
+    <li className={`border-l-4 bg-papel ${e.borda} shadow-[0_1px_0_rgba(25,50,87,0.08)]`}>
       <div className="p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
           <div className="min-w-0 flex-1">
@@ -81,10 +81,12 @@ export function Ficha({
               {c.nome}
             </h3>
             <p className="mt-0.5 text-sm text-tinta-fraca">
-              {c.bairro} · {c.aproximada ? "cerca de " : ""}
+              {c.bairro}. {c.aproximada ? "Cerca de " : ""}
               <span className="num">{km(c.distanciaKm)}</span>
-              {c.pontoMaisProximo !== bairroCasa && (
-                <> de {bairros[c.pontoMaisProximo]?.nome}</>
+              {c.pontoMaisProximo !== bairroCasa ? (
+                <> de {bairros[c.pontoMaisProximo]?.nome}.</>
+              ) : (
+                <> de distância.</>
               )}
             </p>
           </div>
@@ -100,13 +102,13 @@ export function Ficha({
         <p className="mt-2 text-sm text-tinta">
           {a.filaAtual === 0 ? (
             <>
-              <strong className="num">Ninguém esperando</strong> · chamou{" "}
-              <strong className="num">{a.profundidadeAtual}</strong> famílias em {ANO}
+              <strong>Ninguém na fila.</strong> Chamou{" "}
+              <strong className="num">{a.profundidadeAtual}</strong> crianças em {ANO}.
             </>
           ) : (
             <>
-              chamou <strong className="num">{a.profundidadeAtual}</strong> ·{" "}
-              <span className="num">{a.filaAtual}</span> famílias esperando
+              Chamou <strong className="num">{a.profundidadeAtual}</strong> crianças em {ANO}.{" "}
+              <span className="num">{a.filaAtual}</span> famílias estão na fila.
             </>
           )}
         </p>
@@ -115,13 +117,13 @@ export function Ficha({
           {href ? (
             <Link
               href={href}
-              className="rounded-lg bg-tinta px-4 py-2.5 text-sm font-semibold text-papel transition-colors hover:bg-[#0e2138]"
+              className="rounded-lg bg-tinta px-4 py-2.5 text-sm font-semibold text-papel transition-colors hover:bg-tinta-forte"
             >
-              Escolher como {ordem}ª
+              Escolher como {ordem}ª opção
             </Link>
           ) : (
             <span className="text-sm text-tinta-fraca">
-              Remova uma opção para escolher esta
+              Para escolher esta creche, tire uma da sua lista.
             </span>
           )}
 
@@ -142,7 +144,7 @@ export function Ficha({
                   <thead>
                     <tr className="text-left text-xs text-tinta-fraca">
                       <th className="py-1 font-medium">Ano</th>
-                      <th className="py-1 text-right font-medium">Chamadas</th>
+                      <th className="py-1 text-right font-medium">Crianças chamadas</th>
                       <th className="py-1 text-right font-medium">Fila</th>
                     </tr>
                   </thead>
@@ -159,9 +161,10 @@ export function Ficha({
               </div>
 
               <p className="text-xs leading-relaxed text-tinta-fraca">
-                &quot;Chamadas&quot; = famílias convocadas naquele ano, somando as que confirmaram e
-                as que não apareceram. Não é a posição da classificação: essa informação não existe
-                na base pública, e não a estimamos.
+                &quot;Crianças chamadas&quot; é quantas famílias a creche chamou naquele ano. Conta
+                as que aceitaram a vaga e também as que não apareceram. Aqui não mostramos a sua
+                posição na fila: esse número não existe na base pública da prefeitura, e nós não
+                inventamos ele.
               </p>
             </div>
           </details>

@@ -1,21 +1,31 @@
 @import "tailwindcss";
 
-/* Ferramenta de serviço público lida no celular, muitas vezes com pressa e no sol.
-   Contraste alto, alvos grandes, nada de cinza-sobre-cinza. */
-@theme {
-  --color-tinta: #16324f; /* azul-tinta de carimbo: texto e estrutura */
-  --color-tinta-fraca: #5a708a;
-  --color-papel: #faf8f4; /* papel de formulário */
-  --color-papel-fundo: #f2eee7;
-  --color-linha: #e0d9cd;
+/* Identidade visual da Prefeitura do Rio / Secretaria Municipal de Educacao.
+   O azul institucional #193257 e o azul-claro #55B8E9 do brasao foram tirados do
+   arquivo oficial da marca (educacao.prefeitura.rio/identidade-visual). Todo o
+   resto do sistema deriva desses dois.
 
-  /* sinal, não enfeite: dizem se a chamada alcança a fila */
+   Ferramenta de servico publico lida no celular, muitas vezes com pressa e no sol:
+   contraste alto, alvos grandes, nada de cinza sobre cinza. */
+@theme {
+  --color-tinta: #193257; /* azul institucional: texto e estrutura */
+  --color-tinta-forte: #102340; /* estado pressionado dos botoes */
+  --color-tinta-fraca: #4d6379; /* texto de apoio, 6,2:1 no papel branco */
+
+  --color-marca: #55b8e9; /* azul-claro do brasao: acento, nunca texto */
+  --color-marca-clara: #e7f4fc;
+
+  --color-papel: #ffffff;
+  --color-papel-fundo: #eef3f8;
+  --color-linha: #d0dae6;
+
+  /* sinal, nao enfeite: dizem se a chamada alcanca a fila */
   --color-vaga: #0b6e4f;
-  --color-vaga-clara: #e6f2ec;
-  --color-meia: #97701f;
-  --color-meia-clara: #f7efdc;
-  --color-espera: #9c3d18;
-  --color-espera-clara: #fbeae1;
+  --color-vaga-clara: #e4f1eb;
+  --color-meia: #8a6412;
+  --color-meia-clara: #fbf0d8;
+  --color-espera: #a53a17;
+  --color-espera-clara: #fbe9e2;
 
   --font-display: var(--fonte-display), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--fonte-corpo), ui-sans-serif, system-ui, sans-serif;
@@ -27,12 +37,12 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Números são a matéria-prima desta tela: sempre tabulares, para as colunas baterem. */
+/* Numeros sao a materia-prima desta tela: sempre tabulares, para as colunas baterem. */
 .num {
   font-variant-numeric: tabular-nums;
 }
 
-/* Foco visível de verdade — teclado e leitor de tela são parte do piso de qualidade. */
+/* Foco visivel de verdade: teclado e leitor de tela sao parte do piso de qualidade. */
 :where(a, button, select, summary, input):focus-visible {
   outline: 2px solid var(--color-tinta);
   outline-offset: 2px;
@@ -47,7 +57,7 @@ summary::-webkit-details-marker {
   display: none;
 }
 
-/* O triângulo que gira ao abrir a ficha. */
+/* O triangulo que gira ao abrir a ficha. */
 .seta {
   transition: transform 160ms ease;
 }

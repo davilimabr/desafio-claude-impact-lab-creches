@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ANO, meta, stats } from "@/lib/creche";
 
-// Tela de evidência — para a SME e para a apresentação, não para a família.
-// Tudo aqui é contagem sobre os processos reais de 2021-2025, reproduzível com
+// Tela de evidência, para a SME e para a apresentação, não para a família.
+// Tudo aqui é contagem sobre os processos reais de 2021 a 2025, reproduzível com
 // `node scripts/ingest.mjs`. Nada é estimativa ou projeção.
 
 export const metadata = {
@@ -40,7 +40,7 @@ function Numero({
       </p>
       {de && (
         <p className="num mt-1 text-sm text-tinta-fraca">
-          de {n(de)} · {pct(valor, de)}
+          de {n(de)}, ou {pct(valor, de)}
         </p>
       )}
       <p className="mt-3 text-[15px] leading-relaxed text-tinta">{children}</p>
@@ -58,12 +58,14 @@ export default function Diagnostico() {
           Evidência
         </p>
         <h1 className="mt-2 font-display text-[28px] font-bold leading-[1.15] tracking-tight text-tinta sm:text-4xl">
-          A fila não é só escassez.
-          <br />É descompasso.
+          Nem sempre falta vaga.
+          <br />
+          Muitas vezes, falta informação.
         </h1>
         <p className="mt-3 max-w-prose text-[15px] leading-relaxed text-tinta">
-          Contagens sobre o processo de Inscrição Creche de {ANO} da SME-Rio. Não são estimativas
-          nem projeções: são contagens diretas nas bases, reproduzíveis com um comando.
+          Contagens sobre o processo de Inscrição Creche de {ANO} da Secretaria Municipal de
+          Educação. Não são estimativas nem projeções. São contagens diretas nas bases,
+          reproduzíveis com um comando.
         </p>
       </header>
 
@@ -83,20 +85,20 @@ export default function Diagnostico() {
         <div className="grid gap-3">
           <Numero valor={s.sem_vaga_com_ociosa_no_bairro} de={s.criancas_sem_vaga} destaque>
             dessas crianças tinham, <strong>a menos de {s.raio_km} km de casa</strong>, uma creche do{" "}
-            <strong>mesmo grupamento e turno</strong> que procuravam — numa unidade que fechou o ano{" "}
-            <strong>sem ninguém na fila</strong>. E não a escolheram.
+            <strong>mesmo grupamento e turno</strong> que procuravam, em uma unidade que fechou o
+            ano <strong>sem ninguém na fila</strong>. E não a escolheram.
           </Numero>
           <Numero
             valor={s.sem_vaga_com_ociosa_e_opcao_sobrando}
             de={s.sem_vaga_com_ociosa_no_bairro}
           >
             destas ainda tinham <strong>opções em branco</strong> no formulário. A rede oferece 5
-            escolhas; elas não gastaram todas — e a vaga que serviria estava ali.
+            escolhas. Elas não usaram todas, e a vaga que serviria estava ali.
           </Numero>
         </div>
         <p className="mt-4 border-l-4 border-tinta pl-4 font-display text-lg font-semibold leading-snug text-tinta">
-          Não falta vaga para essas famílias. Falta a informação de onde ela está — e é a própria
-          prefeitura que já a tem.
+          Não falta vaga para essas famílias. Falta a informação de onde ela está, e quem já tem
+          essa informação é a própria prefeitura.
         </p>
       </section>
 
@@ -115,7 +117,7 @@ export default function Diagnostico() {
             <tbody className="divide-y divide-linha">
               <tr>
                 <td className="px-4 py-2.5">
-                  <strong>Distância até {s.raio_km} km</strong> — adotado, e é o que a tela usa
+                  <strong>Distância até {s.raio_km} km</strong>, o critério adotado e usado na tela
                 </td>
                 <td className="num px-4 py-2.5 text-right font-bold">
                   {n(s.sensibilidade.por_distancia_3km)}
@@ -151,15 +153,15 @@ export default function Diagnostico() {
         <ul className="space-y-2.5 rounded-xl border border-linha bg-papel p-4 text-sm leading-relaxed text-tinta">
           {meta.premissas.map((p) => (
             <li key={p} className="flex gap-2.5">
-              <span aria-hidden className="text-tinta-fraca">
-                —
+              <span aria-hidden className="text-marca">
+                ●
               </span>
               <span>{p}</span>
             </li>
           ))}
           <li className="flex gap-2.5">
-            <span aria-hidden className="text-tinta-fraca">
-              —
+            <span aria-hidden className="text-marca">
+              ●
             </span>
             <span>
               {s.unidades_sem_coordenada} unidades não têm coordenada própria e herdam o centro do

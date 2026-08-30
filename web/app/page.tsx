@@ -110,9 +110,9 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
           Escolha até {MAX_OPCOES} creches
         </h1>
         <p className="mt-3 max-w-prose text-[15px] leading-relaxed text-tinta">
-          Em cada creche, mostramos <strong>quantas famílias estão esperando</strong> e{" "}
-          <strong>até onde a chamada chegou no ano passado</strong>. Serve para você não gastar suas
-          escolhas numa fila que não anda.
+          Em cada creche, você vê <strong>quantas famílias estão na fila</strong> e{" "}
+          <strong>quantas crianças a creche chamou no ano passado</strong>. Assim você não gasta as
+          suas escolhas em uma fila que quase não anda.
         </p>
       </header>
 
@@ -124,16 +124,16 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <span className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-tinta">
-              Bairro de residência
-              <span className="rounded bg-papel-fundo px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-tinta-fraca">
-                comprovado
+              Bairro onde você mora
+              <span className="rounded bg-marca-clara px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-tinta">
+                já confirmado
               </span>
             </span>
             <p className="rounded-lg border border-linha bg-papel-fundo px-3 py-2.5 text-[15px] text-tinta-fraca">
               {casa?.nome ?? bairro}
             </p>
             <p className="mt-1.5 text-xs leading-relaxed text-tinta-fraca">
-              Vem do comprovante de residência da sua inscrição.
+              Este bairro vem do comprovante de residência que você entregou na inscrição.
             </p>
           </div>
 
@@ -142,9 +142,9 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
               htmlFor="ref2"
               className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-tinta"
             >
-              Outro lugar de referência
+              Outro lugar importante
               <span className="rounded bg-papel-fundo px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-tinta-fraca">
-                opcional
+                OPCIONAL
               </span>
             </label>
             <select
@@ -163,7 +163,8 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
                 ))}
             </select>
             <p className="mt-1.5 text-xs leading-relaxed text-tinta-fraca">
-              Trabalho ou casa de familiar — buscamos creches perto daqui também.
+              Pode ser o seu trabalho ou a casa de um parente. Vamos mostrar também as creches perto
+              desse lugar.
             </p>
           </div>
 
@@ -207,8 +208,8 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
           </div>
         </div>
 
-        <button className="mt-4 w-full rounded-lg bg-tinta px-4 py-2.5 text-sm font-semibold text-papel transition-colors hover:bg-[#0e2138] sm:w-auto">
-          Buscar creches
+        <button className="mt-4 w-full rounded-lg bg-tinta px-4 py-2.5 text-sm font-semibold text-papel transition-colors hover:bg-tinta-forte sm:w-auto">
+          Ver as creches
         </button>
       </form>
 
@@ -216,7 +217,7 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
       {escolhidas.length > 0 && (
         <section className="mb-8 rounded-xl border-2 border-tinta bg-papel p-4 sm:p-5">
           <h2 className="font-display text-sm font-bold uppercase tracking-widest text-tinta">
-            Sua inscrição · <span className="num">{opcoes.length}</span> de {MAX_OPCOES}
+            Suas escolhas: <span className="num">{opcoes.length}</span> de {MAX_OPCOES}
           </h2>
           <ol className="mt-3 divide-y divide-linha">
             {escolhidas.map(({ u, ag, c }, i) => (
@@ -226,28 +227,29 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
                   <p className="font-medium leading-snug text-tinta">{unidades[u]?.n ?? u}</p>
                   <p className="mt-0.5 text-xs text-tinta-fraca">
                     {ag.filaAtual === 0 ? (
-                      <>sem fila · chamou {ag.profundidadeAtual} em 2025</>
+                      <>Sem fila. Chamou {ag.profundidadeAtual} crianças em 2025.</>
                     ) : (
                       <>
-                        {ag.filaAtual} na fila · chamou {ag.profundidadeAtual} em 2025
+                        {ag.filaAtual} famílias na fila. Chamou {ag.profundidadeAtual} crianças em
+                        2025.
                       </>
                     )}
-                    {c && <> · {c.distanciaKm.toFixed(1).replace(".", ",")} km</>}
+                    {c && <> Fica a {c.distanciaKm.toFixed(1).replace(".", ",")} km.</>}
                   </p>
                 </div>
                 <Link
                   href={link({ opcoes: opcoes.filter((x) => x !== u).join(","), p: "" })}
                   className="shrink-0 text-xs font-medium text-tinta-fraca underline underline-offset-4 hover:text-espera"
                 >
-                  remover
+                  Remover
                 </Link>
               </li>
             ))}
           </ol>
           {restantes > 0 && (
             <p className="mt-3 border-t border-linha pt-3 text-sm leading-relaxed text-tinta-fraca">
-              Você ainda pode escolher mais {restantes}. Deixar opções em branco só diminui sua
-              chance — elas não custam nada e não atrapalham a sua primeira escolha.
+              Você ainda pode escolher mais {restantes}. Usar todas as escolhas aumenta a sua chance
+              de conseguir uma vaga. As outras escolhas não atrapalham a sua primeira.
             </p>
           )}
         </section>
@@ -261,7 +263,7 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
             {filtradas.length === 1 ? "creche" : "creches"} perto de você
           </h2>
           <p className="text-sm text-tinta-fraca">
-            {grupamento} · {turno} · até {RAIO_PADRAO_KM} km
+            {grupamento}. {turno}. Até {RAIO_PADRAO_KM} km.
           </p>
         </div>
 
@@ -270,7 +272,7 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
           <div className="mb-5 space-y-3 rounded-xl border border-linha bg-papel p-4">
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-wider text-tinta-fraca">
-                Chance
+                Chance de conseguir vaga
               </p>
               <div className="flex flex-wrap gap-2">
                 {FAIXAS.map((f) => {
@@ -340,7 +342,7 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
 
         {restantes === 0 && (
           <p className="mb-4 rounded-lg bg-tinta px-4 py-3 text-sm font-medium text-papel">
-            Você já usou as {MAX_OPCOES} escolhas. Remova uma acima para trocar.
+            Você já escolheu as {MAX_OPCOES} creches. Para trocar, tire uma da lista acima.
           </p>
         )}
 
@@ -360,18 +362,18 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
           <div className="rounded-xl border border-linha bg-papel p-6 text-center">
             <p className="font-display text-lg font-semibold text-tinta">
               {todas.length === 0
-                ? "Nenhuma creche encontrada por aqui"
+                ? "Não encontramos creches perto de você"
                 : "Nenhuma creche com esses filtros"}
             </p>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-tinta-fraca">
               {todas.length === 0 ? (
                 <>
-                  Não há creche com {grupamento} · {turno} num raio de {RAIO_PADRAO_KM} km com
-                  histórico suficiente para mostrar. Tente outro turno, ou informe um segundo lugar
-                  de referência.
+                  Não existe creche com a turma {grupamento} no turno {turno} a até{" "}
+                  {RAIO_PADRAO_KM} km daqui que tenha histórico para mostrar. Tente outro turno, ou
+                  informe outro lugar importante para você.
                 </>
               ) : (
-                <>Tire um filtro para ver as outras {disponiveis.length} creches encontradas.</>
+                <>Tire um filtro para ver as outras {disponiveis.length} creches.</>
               )}
             </p>
             {(chance || filtroBairro) && (
@@ -402,7 +404,7 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
               <span />
             )}
             <p className="num text-sm text-tinta-fraca">
-              {(pagina - 1) * POR_PAGINA + 1}–{Math.min(pagina * POR_PAGINA, filtradas.length)} de{" "}
+              {(pagina - 1) * POR_PAGINA + 1} a {Math.min(pagina * POR_PAGINA, filtradas.length)} de{" "}
               {filtradas.length}
             </p>
             {pagina < paginas ? (
@@ -421,19 +423,19 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
 
       <footer className="mt-12 space-y-2 border-t border-linha pt-6 text-xs leading-relaxed text-tinta-fraca">
         <p>
-          Os números vêm dos processos reais de 2021–2025 da SME-Rio.{" "}
-          <strong className="font-semibold">Nada aqui é previsão</strong> — é a contagem que a
-          prefeitura já fazia, devolvida a quem precisa dela.
+          Os números vêm das inscrições reais de 2021 a 2025 da Secretaria Municipal de Educação.{" "}
+          <strong className="font-semibold">Nada aqui é adivinhação.</strong> É a contagem que a
+          prefeitura já fazia, agora mostrada para quem precisa dela.
         </p>
         <p>
-          As distâncias partem do centro do bairro de referência, não do seu endereço exato:
-          precisão de cerca de 1 km.
+          A distância é medida do centro do seu bairro, e não da porta da sua casa. Ela pode variar
+          cerca de 1 km para mais ou para menos.
         </p>
         <p>
           <Link href="/diagnostico" className="underline underline-offset-4 hover:text-tinta">
             Ver o diagnóstico da rede
-          </Link>{" "}
-          — os números que motivaram esta ferramenta.
+          </Link>
+          . São os números que deram origem a esta ferramenta.
         </p>
       </footer>
     </main>

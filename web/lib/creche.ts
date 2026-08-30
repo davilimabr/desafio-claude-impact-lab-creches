@@ -69,7 +69,7 @@ export const listaBairros = Object.entries(bairros)
 
 /**
  * Quantas famílias a unidade convocou naquele slot: as que aceitaram e as que não.
- * Não é "até que posição da classificação ela desceu" — a base não traz isso.
+ * Não é "até que posição da classificação ela desceu": a base não traz isso.
  */
 export const profundidadeDeChamada = (s: Slot) => s.c + s.x;
 
@@ -118,7 +118,7 @@ export function agregado(u: string, g: string, h: string): Agregado | null {
     historico,
     anosComFilaZero: historico.filter((r) => r.fila === 0).length,
     anosObservados: historico.length,
-    // "vem sem fila" só vale se observamos mais de um ano — um ano zerado pode ser acaso
+    // "vem sem fila" só vale se observamos mais de um ano: um ano zerado pode ser acaso
     estavel: historico.length >= 2 && historico.slice(0, 2).every((r) => r.fila === 0),
   };
 }
@@ -156,8 +156,8 @@ export function haversine(lat1: number, lng1: number, lat2: number, lng2: number
 }
 
 /**
- * Distância da família até a unidade. A família é o centróide do bairro dela —
- * a base é anonimizada e não traz lat/long do responsável. Precisão de ±1 km.
+ * Distância da família até a unidade. A família é o centróide do bairro dela,
+ * porque a base é anonimizada e não traz lat/long do responsável. Precisão de ±1 km.
  */
 export function distanciaKm(bairroFamilia: string, unidade: string): number | null {
   const b = bairros[bairroFamilia];
@@ -190,7 +190,7 @@ export type Candidata = {
 
 /**
  * Todas as unidades que atendem o grupamento/turno dentro do raio de algum ponto de
- * referência da família — as congestionadas inclusive.
+ * referência da família, as congestionadas inclusive.
  *
  * Esconder as lotadas seria decidir pela família. O ponto do produto é o contrário:
  * mostrar tudo que existe perto, com o sinal de chance à vista, para que a escolha
