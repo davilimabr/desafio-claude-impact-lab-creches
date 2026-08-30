@@ -17,15 +17,20 @@ Das **14.219 crianças que terminaram o processo de 2025 sem nenhuma vaga**:
 
 | Recorte | Crianças | % do total sem vaga |
 | --- | ---: | ---: |
-| Tinham, **no próprio bairro**, unidade que fechou 2025 com **fila zero** e que não escolheram | **10.340** | **72,7%** |
-| Idem, exigindo ainda o **mesmo grupamento e o mesmo turno** que a família buscava | **8.822** | **62,0%** |
-| Destas, as que ainda tinham **opção sobrando** (usaram menos de 5) | **7.262** | 51,1% |
+| Tinham, **a menos de 3 km de casa**, unidade com **fila zero** no **mesmo grupamento e turno** que buscavam, e não a escolheram | **12.362** | **86,9%** |
+| Destas, as que ainda tinham **opção sobrando** (usaram menos de 5) | **9.843** | 69,2% |
 
-> **8.822 crianças ficaram sem creche em 2025 tendo, no próprio bairro, uma vaga do exato grupamento e turno que procuravam — numa unidade que terminou o ano sem ninguém na fila.** Sete mil delas ainda tinham opções não usadas no formulário.
+> **12.362 crianças ficaram sem creche em 2025 tendo, a menos de 3 km de casa, uma vaga do exato grupamento e turno que procuravam — numa unidade que terminou o ano sem ninguém na fila.** Quase dez mil delas ainda tinham opções não usadas no formulário.
 
-O recorte estrito (mesmo bairro + mesmo grupamento + mesmo turno) é deliberadamente conservador: não conta bairro vizinho, não conta unidade a 800 m do outro lado da divisa, não conta turno alternativo. O número real é maior. **8.822 é o piso.**
+**Como esse número é medido — e por que não é por bairro.** A primeira apuração cruzou por *nome de bairro* e deu 8.822. Está errada por baixo e por cima ao mesmo tempo: as duas fontes de bairro disponíveis (a planilha de localização e a Query D) discordam sobre onde ficam algumas unidades, e "mesmo bairro" chega a emparelhar unidades a mais de 3 km uma da outra — o par Clarice Lispector / Edson Luiz, que as duas fontes divergem, está a **3,21 km** pela coordenada real.
 
-Em média, cada uma dessas crianças tinha **8,03 unidades ociosas** no próprio bairro que não escolheu.
+O número adotado usa **distância**, não nome: haversine entre o centróide do bairro da família e a coordenada real da unidade, raio de 3 km — exatamente o que o produto faz na tela. O script grava as três leituras em `stats.sensibilidade`, então qualquer uma é auditável:
+
+| Critério | Crianças |
+| --- | ---: |
+| Distância ≤ 3 km (**adotado**, e é o que a tela usa) | **12.362** |
+| Mesmo bairro, pela planilha de localização | 9.524 |
+| Mesmo bairro, pela Query D | 9.194 |
 
 ### 1.2 Por que isso acontece — as opções não gastas
 
@@ -55,9 +60,19 @@ Bairro **ITANHANGÁ**, Maternal II Integral, processo de 2025 — duas unidades,
 | Convocações feitas (conf + não-conf) | **44** | 22 |
 | Fila em 2021 · 2022 · 2023 · 2024 | — | 82 · 40 · 56 · **0** |
 
-A família que era a **100ª** na fila da Clarice Lispector nunca teve chance: a unidade chamou 44 pessoas no ano inteiro. No mesmo bairro, no mesmo grupamento e no mesmo turno, o CM Edson Luiz **não tinha ninguém esperando** — e vinha esvaziando desde 2021.
+Uma família na fila da Clarice Lispector para Maternal II integral disputava **235 lugares numa unidade que chamou 44 famílias no ano inteiro**. É a leitura que o portal de hoje não faz.
 
-> ⚠️ **Números apurados vs. ilustrativos.** Tudo nesta seção (filas, confirmados, convocações, os 8.822) foi contado direto nas bases e é citável no pitch. **As distâncias em quilômetros nos mockups da seção 6 e no roteiro da seção 9 ainda são ilustrativas** — o lat/long existe e casa (seção 4), mas o haversine só roda no P0. Trocar pelos valores reais assim que o P0 fechar; até lá, falar "no mesmo bairro", que é fato verificado.
+> ⚠️ **Correção após o P0.** O par de demo original era Clarice Lispector → **CM Edson Luiz**, "no mesmo bairro". As coordenadas reais desmentem: as duas estão a **3,21 km** uma da outra, e as duas fontes de bairro discordam sobre elas. **Não usar esse par no palco.**
+>
+> O motor, rodando por distância real, encontrou alvos melhores para a mesma família — todos verificados em 2025:
+>
+> | Alternativa | Distância | Situação 2025 |
+> | --- | ---: | --- |
+> | **EDI CARMEN MIRANDA** (Barra da Tijuca) | **2,8 km** | fila **zero**, chamou **70** famílias, **sem fila há 4 anos** |
+> | EDI MARCELO PARENTE GOMES DE OLIVEIRA (Anil) | 2,3 km | fila zero, chamou 5 |
+> | CP JARDIM ESCOLA TURMINHA DA ARCA - JETA (Jacarepaguá) | 2,8 km | fila zero, chamou 84 |
+>
+> **A Carmen Miranda é o novo par de demo**: 70 convocações por ano e quatro anos sem fila é lastro muito mais forte que as 22 do Edson Luiz.
 
 Ninguém contou isso a essa família. É exatamente o que o Copiloto conta.
 
@@ -75,7 +90,7 @@ Isso reposiciona o caminho D. Não é "uma tela bonita para a família". É **re
 
 ### M1 — Profundidade de chamada: transformar posição em probabilidade
 
-**A dor.** *"O candidato consegue ver no site da matrícula"* — vê a posição, um número sem escala. Ser o 100º pode ser ótimo ou impossível; a família não tem como saber.
+**A dor.** *"O candidato consegue ver no site da matrícula"* — vê que está na fila, um fato sem escala. Estar na fila pode ser ótimo ou impossível; a família não tem como saber.
 
 **A regra.** Para cada slot `(unidade, grupamento, turno)` e cada ano, a base permite calcular:
 
@@ -85,11 +100,14 @@ profundidade_de_chamada(slot, ano) = Confirmado + Cancelado na confirmacao
 
 É literalmente **quantas famílias aquela unidade convocou** naquele slot naquele ano — as que aceitaram e as que não. Para a Clarice Lispector / Maternal II / Integral / 2025: `25 + 19 = 44`.
 
-A tela então diz, com números reais e nenhuma modelagem:
+A tela confronta isso com o tamanho da fila, com números reais e nenhuma modelagem:
 
-> Você é o **100º** nesta fila.
-> Nos últimos 3 anos, esta unidade chamou até aproximadamente o **44º**, **38º** e **51º**.
-> **Sua chance aqui é baixa.**
+> **235 famílias na fila** — a unidade chamou **44** em 2025 (mediana de 44 nos últimos 3 anos).
+> 🔴 **Chance baixa**
+
+> **A decisão de honestidade que mudou o desenho.** A versão original desta seção dizia *"você é o 100º; a unidade chamou até o 44º"*. **Não dá para fazer isso, e não fazemos.** A classificação é por pontuação socioeconômica, não por ordem de inscrição, e a base extraída **não traz a posição de cada criança**. Derivar uma posição da data de inscrição seria inventar o número mais sensível da tela — exatamente o que a seção 3 proíbe.
+>
+> Confrontar **tamanho da fila × profundidade de chamada** conta a mesma história, com dado que existe. E é melhor: fala para todas as famílias daquela fila de uma vez, não só para uma.
 
 Note o que isso **não** é: não é previsão, não é ML, não é o Claude opinando. É uma contagem histórica devolvida com contexto. É auditável linha a linha — o que importa em serviço público.
 
@@ -97,11 +115,13 @@ Note o que isso **não** é: não é previsão, não é ML, não é o Claude opi
 
 | Faixa | Regra | Rótulo na tela |
 | --- | --- | --- |
-| Alta | `posição ≤ 0,7 × mediana(profundidade, 3 anos)` | 🟢 Chance alta |
-| Média | `posição ≤ 1,3 × mediana` | 🟡 Chance média |
+| Alta | `fila == 0` ou `fila ≤ 0,7 × mediana(profundidade, 3 anos)` | 🟢 Chance alta |
+| Média | `fila ≤ 1,3 × mediana` | 🟡 Chance média |
 | Baixa | acima disso | 🔴 Chance baixa |
 
 O fator 1,3 não é arbitrário: a mediana de não-confirmação da rede é 24,2%, então a fila anda mais fundo do que o número de vagas sugere. Declarar essa margem é honestidade, não chute.
+
+Implementado em [`web/lib/creche.ts`](../web/lib/creche.ts) (`profundidadeDeChamada`, `agregado`, `faixaDeChance`).
 
 ### M2 — Recomendação territorial: o motor de vagas ociosas
 
@@ -125,7 +145,7 @@ Pesos iniciais `0,4 / 0,4 / 0,2`, **expostos em um arquivo de configuração e c
 
 **A saída na tela é uma frase, não um ranking:**
 
-> No mesmo bairro, a **1,2 km**, o **CM EDSON LUIZ** tem Maternal II Integral com **fila zero** — e vem sem fila há 2 anos.
+> A **2,8 km**, a **EDI CARMEN MIRANDA** tem Maternal II Integral com **fila zero** — chamou 70 famílias em 2025 e vem sem fila há 4 anos.
 > **[ Adicionar como minha 3ª opção ]**
 
 O botão é o produto inteiro. Recomendação sem ação de um clique é conteúdo, não solução.
@@ -196,7 +216,7 @@ Continua não existindo lat/long **da família** — a Query A dá `CEP` e `bair
 A solução, agora aplicada só a esse lado:
 
 - **Centróide de bairro**, calculado a partir das coordenadas reais das unidades daquele bairro. A família herda o centróide do seu bairro; o haversine passa a existir para toda família, sem geocodificador e sem chamada externa.
-- Precisão da ordem de **±1 km** — suficiente para a decisão que a família precisa tomar ("no meu bairro" vs. "do outro lado da cidade"), insuficiente para prometer precisão de rua. A tela escreve **"≈ 1,2 km"**, com o til, e a premissa vai no README.
+- Precisão da ordem de **±1 km** — suficiente para a decisão que a família precisa tomar ("perto de casa" vs. "do outro lado da cidade"), insuficiente para prometer precisão de rua. A premissa está no rodapé da tela e vai no README.
 - Para as 16 unidades sem coordenada, o fallback é o centróide do próprio bairro, que a `Planilha1` fornece.
 
 > Em produção nada disso é necessário: o CEP do responsável já está no sistema da SME e a prefeitura tem geocodificador próprio. A aproximação é uma limitação de hackathon, não do desenho.
@@ -290,48 +310,49 @@ opcao_escolhida(candidatura_id FK, ordem 1..5, esc_codigo,
 
 ### 6.1 Minha fila — a tela que responde "isso anda?"
 
+**Construída e rodando** em [`web/app/page.tsx`](../web/app/page.tsx). Saída real do servidor, bairro Itanhangá / Maternal II / Integral:
+
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  Inscrição de Ana · Maternal II · Integral                      │
-│  Responsável: ITANHANGÁ · contato atualizado há 4 meses ⚠      │
+│  Copiloto da Família · Inscrição Creche 2025                    │
+│  Minha fila                                                     │
+│                                                                 │
+│  Em 2025, 14.219 crianças terminaram o processo sem nenhuma     │
+│  vaga. 12.362 delas tinham, a menos de 3 km de casa, uma        │
+│  creche do mesmo grupamento e turno — e sem ninguém na fila.    │
 ├────────────────────────────────────────────────────────────────┤
-│                                                                │
-│  1ª opção  EDI ESCRITORA CLARICE LISPECTOR        ≈ 0,9 km     │
-│            Você é o 100º de 235 na fila                        │
-│            🔴 Chance baixa — em 2025 esta unidade              │
-│               chamou até cerca do 44º lugar                    │
-│                                                                │
-│  2ª opção  EDI PROFESSORA EMILIA MARIA VIEIRA     ≈ 2,4 km     │
-│            Você é o 61º de 180 na fila                         │
-│            🟡 Chance média — chamou até cerca do 55º           │
-│                                                                │
-│  3ª opção  — vazia —                                           │
-│  4ª opção  — vazia —                                           │
-│  5ª opção  — vazia —                                           │
-│                                                                │
-│  ⚡ Você tem 3 opções sobrando. Veja o que existe perto:        │
-│                                                                │
-│  ┌──────────────────────────────────────────────────────────┐ │
-│  │ CM EDSON LUIZ                    ITANHANGÁ · ≈ 1,2 km    │ │
-│  │ Maternal II · Integral                                   │ │
-│  │ 🟢 FILA ZERO — sem ninguém esperando há 2 anos           │ │
-│  │ Chamou 22 famílias em 2025                               │ │
-│  │                              [ Usar como 3ª opção ]      │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│  ┌──────────────────────────────────────────────────────────┐ │
-│  │ CP CRECHE MUNDO MÁGICO I         ITANHANGÁ · ≈ 1,8 km    │ │
-│  │ 🟢 FILA ZERO           [ Usar como 4ª opção ]            │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                                │
-│  [ 💬 Não entendi minha situação — me explique ]  ← Claude     │
+│  MINHAS OPÇÕES (1 de 5)                                         │
+│                                                                 │
+│  1ª opção  EDI ESCRITORA CLARICE LISPECTOR    🔴 Chance baixa   │
+│            235 famílias na fila — a unidade chamou 44 em        │
+│            2025 (mediana de 44 nos últimos 3 anos).             │
+│                                                                 │
+│  2ª a 5ª opção — em branco                                      │
+├────────────────────────────────────────────────────────────────┤
+│  VOCÊ TEM 4 OPÇÕES SOBRANDO                                     │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ EDI CARMEN MIRANDA                     🟢 Chance alta    │  │
+│  │ Barra da Tijuca · 2.8 km                                 │  │
+│  │ Ninguém na fila — a unidade chamou 70 famílias em 2025   │  │
+│  │ e está sem fila há 4 anos.                               │  │
+│  │                             [ Usar como 2ª opção ]       │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ EDI MARCELO PARENTE GOMES DE OLIVEIRA  🟢 Chance alta    │  │
+│  │ Anil · 2.3 km · fila zero, chamou 5 em 2025              │  │
+│  │                             [ Usar como 2ª opção ]       │  │
+│  └──────────────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 Três coisas fazem essa tela funcionar, e vale apontá-las na apresentação:
 
-- **A comparação `100º` vs `chamou até o 44º`** é o momento em que a família entende o próprio caso pela primeira vez. Hoje ela só vê o `100º`.
-- **O aviso de opções sobrando** transforma um número morto em ação. 79% das crianças sem vaga em 2025 estavam nesse estado.
+- **O confronto `235 na fila` vs `chamou 44`** é o momento em que a família entende o próprio caso pela primeira vez. Hoje ela só vê "você está na fila".
+- **O aviso de opções sobrando** transforma um número morto em ação. 69% das crianças sem vaga em 2025 estavam nesse estado.
 - **O botão de usar como opção** fecha o ciclo na mesma tela. Sem ele, é informação; com ele, é matrícula.
+
+O estado vive na URL (`?bairro=&grupamento=&turno=&opcoes=`), então tudo é renderizado no servidor, cada passo da demo é um link compartilhável e não há bundle de cliente para a lógica.
 
 ### 6.2 Mapa do bairro — o argumento visual
 
@@ -343,7 +364,7 @@ O mapa não é enfeite: é a única forma de a família ver, de uma vez, que esc
 
 Painel que abre sobre a tela, alimentado exclusivamente pelo JSON já calculado:
 
-> "Ana está em 100º lugar na EDI Clarice Lispector. Nos últimos três anos essa creche conseguiu chamar entre 38 e 51 famílias por ano para o Maternal II integral — então a chance de chegar no 100º lugar é pequena. A boa notícia: o CM Edson Luiz, a cerca de 1,2 km da sua casa, no mesmo bairro, está sem fila de espera há dois anos para essa mesma turma. Você ainda tem três opções livres na sua inscrição."
+> "Na EDI Clarice Lispector há 235 famílias esperando por uma vaga de Maternal II integral, e no ano passado a creche conseguiu chamar 44. A fila é bem maior do que o que ela costuma atender. A boa notícia: a EDI Carmen Miranda, a cerca de 2,8 km da sua casa, atende a mesma turma, chamou 70 famílias no ano passado e está sem fila de espera há quatro anos. Você ainda tem quatro opções livres na sua inscrição."
 
 Sem número novo. Só tradução.
 
@@ -361,12 +382,12 @@ Isso vale ponto de Engenharia e de Impacto: nenhum jurado pode perguntar *"mas f
 
 | Bairro | Congestionada | Ociosa (mesmo grupamento/turno) |
 | --- | --- | --- |
-| **ITANHANGÁ** | EDI ESCRITORA CLARICE LISPECTOR (0716812) — Mat. II Int., fila **235**, chamou 44 | **CM EDSON LUIZ** (0724604) — fila **0**, chamou 22 |
+| **ITANHANGÁ** | EDI ESCRITORA CLARICE LISPECTOR (0716812) — Mat. II Int., fila **235**, chamou 44 | **EDI CARMEN MIRANDA** — 2,8 km, fila **0**, chamou **70**, sem fila há 4 anos |
 | **CURICICA** | CM MARIA DA CONCEIÇÃO SILVEIRA (0716613) — Mat. II Int., fila **72** | **EDI PROF. TEREZINHA SARAIVA** (0716824) — fila **0**, 34 confirmados |
 
 Um terceiro par, útil se o time também apresentar o caminho C: **MARÉ** — CM VILA PINHEIRO (0430602), berçário integral, fila 95 → **CP SOCIEDADE DE ENSINO TEREZA CRISTINA** (04018), fila 0, 47 confirmados. É a mesma unidade que aparece na seção 6 do [caminho C](caminho-c-torre-de-convocacao.md), o que costura os dois documentos.
 
-**Seed:** um passe único sobre a Query A inteira gera `data/creche.json` (seção 5.2). As famílias da demo saem de crianças reais do grupo das 8.822 — `aluno_0120041` (Rio Comprido, Maternal I integral, 3 opções usadas, 5 unidades ociosas no bairro), `aluno_0089689`, `aluno_0083191` e outras já identificadas na apuração — com posição na fila derivada da ordem real.
+**Seed:** um passe único sobre a Query A inteira gera `web/data/creche.json` (seção 5.2) — **já implementado e rodando** em [`scripts/ingest.mjs`](../scripts/ingest.mjs). O arquivo carrega 40 famílias reais do grupo das 12.362 em `familias_demo`, cada uma com bairro, grupamento, turno, as opções que de fato escolheu e as unidades ociosas que tinha por perto.
 
 **Contatos:** `aluno_anon` é anonimizado e não há telefone nas bases. Gerar contatos fictícios **claramente marcados como tais**. Nunca apresentar contato fabricado como se fosse real.
 
@@ -417,12 +438,12 @@ Janela real: ~2h. É mais apertado que o caminho C — o setup do Node cobra o p
 
 ## 9. Roteiro da demo (3 min dos 6)
 
-1. **Abre com o paradoxo, sem tela.** "Em 2025, 14.219 crianças terminaram o processo de creche do Rio sem nenhuma vaga. **8.822 delas tinham, no próprio bairro, uma creche com o exato grupamento e turno que procuravam — e sem ninguém na fila.**"
-2. **Mostra a tela 6.1 com uma família real do Itanhangá.** "Esta família é a 100ª na fila. É o único número que o portal de hoje mostra a ela."
-3. **Aponta a linha de baixo.** "E este é o número que a prefeitura tem e nunca devolveu: essa creche chamou 44 famílias no ano inteiro. A 100ª nunca teve chance — e passou o ano achando que tinha."
-4. **Rola até o card verde.** "No mesmo bairro, mesmo Maternal II integral: CM Edson Luiz, fila zero, sem fila há dois anos. Esta família tinha três opções em branco no formulário." *(Trocar por "a X km" só depois que o P0 carregar o lat/long — ver aviso na seção 1.3.)*
-5. **Clica em `Usar como 3ª opção`.** A opção entra na lista, a faixa de chance vira verde. "Um clique. E isso vale para 7.262 crianças que ficaram sem creche em 2025 com opções não usadas."
-6. **Fecha no mapa** (se o P4 existir): "Ela escolheu as duas vermelhas. Estas cinco verdes estavam aqui o tempo todo."
+1. **Abre com o paradoxo, sem tela.** "Em 2025, 14.219 crianças terminaram o processo de creche do Rio sem nenhuma vaga. **12.362 delas tinham, a menos de 3 km de casa, uma creche com o exato grupamento e turno que procuravam — e sem ninguém na fila.**"
+2. **Mostra a tela com a família do Itanhangá.** "Ela pediu uma vaga de Maternal II integral na EDI Clarice Lispector. O portal de hoje diz que ela está na fila. Só isso."
+3. **Aponta a leitura.** "E este é o número que a prefeitura tem e nunca devolveu: **235 famílias na fila, e a unidade chamou 44 no ano inteiro.** A conta não fecha, e ninguém contou isso a ela."
+4. **Rola até o card verde.** "A **2,8 km**: EDI Carmen Miranda, mesmo Maternal II integral, **fila zero, 70 famílias chamadas, sem fila há quatro anos**. Esta família tinha quatro opções em branco no formulário."
+5. **Clica em `Usar como 2ª opção`.** A opção entra na lista com chance alta. "Um clique. E isso vale para **9.843 crianças** que ficaram sem creche em 2025 com opções não usadas."
+6. **Fecha no mapa** (se o P4 existir): "Ela escolheu a vermelha. Estas verdes estavam aqui o tempo todo."
 
 O gancho de honestidade que fecha: *"nada disso é previsão. É a contagem que a SME já fazia, devolvida para quem precisava dela."*
 
@@ -462,12 +483,12 @@ O documento de decisão recomenda **[E] (B+C)**. Vale registrar por que D como p
 | | [E] B+C | [D] Copiloto |
 | --- | --- | --- |
 | Onde ataca | Depois da inscrição — ordem e prazo | **Antes** — na formação da fila |
-| Número de abertura | 14.219 sem vaga; 24,2% de não-confirmação | **8.822 tinham vaga ociosa no próprio bairro** |
+| Número de abertura | 14.219 sem vaga; 24,2% de não-confirmação | **12.362 tinham vaga ociosa a menos de 3 km** |
 | Quem é o usuário | Diretor e CRE (servidores) | **A família** — o beneficiário final |
 | Risco de escopo | Alto: dois subsistemas em ~2h | **Baixo**: um join, uma distância, uma tela |
 | Critério Produto (peso 20) | Painel administrativo | **Tela pública polida, sem treino nenhum** |
 | Critério Impacto (peso 40) | Contrafactual simulado | **Contagem direta sobre 2025 — não é simulação** |
 
-O ponto mais forte: o número de 8.822 **não é o resultado de um modelo rodando**. É uma contagem no dado real, verificável por qualquer jurado com acesso às bases. O contrafactual do caminho B depende de aceitar as premissas do simulador; este não depende de nada.
+O ponto mais forte: o número de 12.362 **não é o resultado de um modelo rodando**. É uma contagem no dado real, reproduzível com `node scripts/ingest.mjs` e verificável por qualquer jurado com acesso às bases. O contrafactual do caminho B depende de aceitar as premissas do simulador; este não depende de nada.
 
 E a fraqueza declarada em [caminhos-de-implementacao.md](caminhos-de-implementacao.md) — *"sozinho, não muda o processo de retaguarda"* — se responde sozinha: **uma criança que se inscreve numa unidade com vaga não precisa da retaguarda funcionar.** O melhor lugar para consertar a fila é antes de ela existir.
