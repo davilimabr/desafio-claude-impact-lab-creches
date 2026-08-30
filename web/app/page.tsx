@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Mapa } from "./mapa";
 import {
   ANO,
   RAIO_PADRAO_KM,
@@ -102,13 +101,8 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
     return `/?${q}`;
   };
 
-  const pontos = [
-    { bk: bairro, rotulo: "Casa" },
-    ...(ref2 ? [{ bk: ref2, rotulo: bairros[ref2]?.nome ?? ref2 }] : []),
-  ];
-
   const todas = candidatas({
-    pontos: pontos.map((p) => p.bk),
+    pontos: ref2 ? [bairro, ref2] : [bairro],
     grupamento,
     horario: turno,
   });
@@ -253,13 +247,6 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
               ficaram sem vaga tendo opções em branco.
             </p>
           )}
-        </section>
-      )}
-
-      {/* o mapa */}
-      {todas.length > 0 && (
-        <section className="mb-6">
-          <Mapa pontos={pontos} candidatas={todas} escolhidas={opcoes} raioKm={RAIO_PADRAO_KM} />
         </section>
       )}
 
