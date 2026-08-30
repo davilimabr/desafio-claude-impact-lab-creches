@@ -10,6 +10,7 @@ import {
   turnos,
   unidades,
   type Agregado,
+  type Candidata,
   type Faixa,
 } from "@/lib/creche";
 
@@ -39,6 +40,32 @@ const FAIXAS: { valor: string; rotulo: string }[] = [
 ];
 
 const ehFaixa = (s: string): s is Faixa => s === "alta" || s === "media" || s === "baixa";
+
+type Grupo = { chave: string; nome: string; itens: Candidata[] };
+
+/**
+ * Junta as creches por bairro para a lista ficar navegável.
+ * A entrada já vem ordenada por score, então a ordem de aparição decide a ordem
+ * dos grupos: o bairro que tem o melhor resultado abre a lista. A ordenação por
+ * relevância continua valendo, só que agora dentro de cada bairro.
+ */
+function agruparPorBairro(cs: Candidata[]): Grupo[] {
+  const grupos: Grupo[] = [];
+  const indice = new Map<string, Grupo>();
+  for (const c of cs) {
+    const bk = unidades[c.unidade]?.bk ?? "";
+    const nome = (bk && bairros[bk]?.nome) || c.bairro || "Outros bairros";
+    const chave = bk || nome;
+    let g = indice.get(chave);
+    if (!g) {
+      g = { chave, nome, itens: [] };
+      indice.set(chave, g);
+      grupos.push(g);
+    }
+    g.itens.push(c);
+  }
+  return grupos;
+}
 
 export default async function Page({ searchParams }: { searchParams: Params }) {
   const sp = await searchParams;
@@ -92,9 +119,14 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
       (!filtroBairro || unidades[c.unidade]?.bk === filtroBairro),
   );
 
-  const paginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA));
+  // Agrupa antes de paginar, para que as creches de um bairro fiquem sempre
+  // juntas em vez de reaparecerem soltas duas páginas adiante.
+  const ordenadas = agruparPorBairro(filtradas).flatMap((g) => g.itens);
+
+  const paginas = Math.max(1, Math.ceil(ordenadas.length / POR_PAGINA));
   const pagina = Math.min(Math.max(1, Number(sp.p) || 1), paginas);
-  const visiveis = filtradas.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+  const visiveis = ordenadas.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA);
+  const gruposVisiveis = agruparPorBairro(visiveis);
 
   const contagem = {
     alta: disponiveis.filter((c) => c.faixa === "alta").length,
@@ -110,9 +142,9 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
           Escolha até {MAX_OPCOES} creches
         </h1>
         <p className="mt-3 max-w-prose text-[15px] leading-relaxed text-tinta">
-          Em cada creche, você vê <strong>quantas famílias estão na fila</strong> e{" "}
-          <strong>quantas crianças a creche chamou no ano passado</strong>. Assim você não gasta as
-          suas escolhas em uma fila que quase não anda.
+          Em cada creche, você pode ver <strong>quantas famílias estão aguardando atualmente</strong> e{" "}
+          <strong>quantas crianças foram chamadas no ano passado</strong>. Assim, você terá possibilidade
+          de escolher unidades com fila de espera menos    concorrida.
         </p>
       </header>
 
@@ -142,7 +174,7 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
               htmlFor="ref2"
               className="mb-1.5 flex items-center gap-2 text-sm font-semibold text-tinta"
             >
-              Outro lugar importante
+              Outro bairro de interesse
               <span className="rounded bg-papel-fundo px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-tinta-fraca">
                 OPCIONAL
               </span>
@@ -347,17 +379,34 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
         )}
 
         {visiveis.length > 0 ? (
-          <ul className="space-y-3">
-            {visiveis.map((c) => (
-              <Ficha
-                key={c.unidade}
-                c={c}
-                ordem={opcoes.length + 1}
-                bairroCasa={bairro}
-                href={restantes > 0 ? link({ opcoes: [...opcoes, c.unidade].join(","), p: "" }) : null}
-              />
+          <div className="space-y-7">
+            {gruposVisiveis.map((g) => (
+              <section key={g.chave} aria-label={`Creches em ${g.nome}`}>
+                <h3 className="mb-2.5 flex flex-wrap items-baseline gap-x-2 border-b-2 border-marca pb-1.5 font-display text-sm font-bold uppercase tracking-widest text-tinta">
+                  {g.nome}
+                  <span className="text-xs font-medium normal-case tracking-normal text-tinta-fraca">
+                    <span className="num">{g.itens.length}</span>{" "}
+                    {g.itens.length === 1 ? "creche" : "creches"}
+                  </span>
+                </h3>
+                <ul className="space-y-3">
+                  {g.itens.map((c) => (
+                    <Ficha
+                      key={c.unidade}
+                      c={c}
+                      ordem={opcoes.length + 1}
+                      bairroCasa={bairro}
+                      href={
+                        restantes > 0
+                          ? link({ opcoes: [...opcoes, c.unidade].join(","), p: "" })
+                          : null
+                      }
+                    />
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+          </div>
         ) : (
           <div className="rounded-xl border border-linha bg-papel p-6 text-center">
             <p className="font-display text-lg font-semibold text-tinta">

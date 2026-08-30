@@ -77,11 +77,12 @@ export function Ficha({
       <div className="p-4 sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
           <div className="min-w-0 flex-1">
-            <h3 className="font-display text-[17px] font-semibold leading-snug text-tinta">
+            {/* O bairro nao aparece aqui: quem o anuncia e o titulo da secao. */}
+            <h4 className="font-display text-[17px] font-semibold leading-snug text-tinta">
               {c.nome}
-            </h3>
+            </h4>
             <p className="mt-0.5 text-sm text-tinta-fraca">
-              {c.bairro}. {c.aproximada ? "Cerca de " : ""}
+              {c.aproximada ? "Cerca de " : ""}
               <span className="num">{km(c.distanciaKm)}</span>
               {c.pontoMaisProximo !== bairroCasa ? (
                 <> de {bairros[c.pontoMaisProximo]?.nome}.</>
@@ -113,21 +114,21 @@ export function Ficha({
           )}
         </p>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="acoes-ficha mt-4">
           {href ? (
             <Link
               href={href}
-              className="rounded-lg bg-tinta px-4 py-2.5 text-sm font-semibold text-papel transition-colors hover:bg-tinta-forte"
+              className="acao-principal rounded-lg bg-tinta px-4 py-2.5 text-sm font-semibold text-papel transition-colors hover:bg-tinta-forte"
             >
               Escolher como {ordem}ª opção
             </Link>
           ) : (
-            <span className="text-sm text-tinta-fraca">
-              Para escolher esta creche, tire uma da sua lista.
+            <span className="acao-principal text-sm text-tinta-fraca">
+              Tire uma creche da lista acima.
             </span>
           )}
 
-          <details className="w-full">
+          <details>
             <summary className="inline-flex items-center gap-1.5 text-sm font-medium text-tinta underline decoration-linha underline-offset-4 hover:decoration-tinta">
               <span className="seta inline-block text-tinta-fraca">▸</span>
               Por que a chance é {ROTULO[c.faixa].split(" ")[1]}?

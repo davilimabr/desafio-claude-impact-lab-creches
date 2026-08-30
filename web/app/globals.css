@@ -57,6 +57,51 @@ summary::-webkit-details-marker {
   display: none;
 }
 
+/* Acoes da ficha: o botao de escolher fica a esquerda e o "por que a chance e..."
+   logo a direita dele, mas o painel aberto precisa ocupar a linha inteira embaixo.
+   O conteudo do <details> mora num slot interno do navegador, alcancado por
+   ::details-content. Onde esse pseudo-elemento nao existe, o painel so fica mais
+   estreito: degrada sem quebrar nada.
+   Abaixo de 40rem os dois empilham, porque lado a lado sobra menos de 110px para
+   o texto do gatilho e ele quebra em quatro linhas. */
+.acoes-ficha {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 0.75rem;
+}
+.acoes-ficha > .acao-principal {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+}
+.acoes-ficha > details {
+  display: contents;
+}
+.acoes-ficha > details > summary {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
+}
+.acoes-ficha > details::details-content {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: block;
+}
+
+@media (min-width: 40rem) {
+  .acoes-ficha {
+    grid-template-columns: auto 1fr;
+  }
+  .acoes-ficha > details > summary {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .acoes-ficha > details::details-content {
+    grid-row: 2;
+  }
+}
+
 /* O triangulo que gira ao abrir a ficha. */
 .seta {
   transition: transform 160ms ease;
