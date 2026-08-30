@@ -29,6 +29,20 @@ export type Faixa = "alta" | "media" | "baixa";
 export const ANO = 2025;
 export const ANOS_HISTORICO = 3;
 
+/** Quantas creches a família pode listar na inscrição. Regra da própria rede. */
+export const MAX_OPCOES = 5;
+
+/**
+ * A residência da família é dado do cadastro, não escolha de formulário: no processo
+ * real ela é comprovada por documento. Fica aqui só para a demonstração ter um ponto
+ * de partida; as telas aceitam outro pela URL.
+ */
+export const FAMILIA_DEMO = {
+  bairro: "ITANHANGA",
+  grupamento: "Maternal II",
+  turno: "Integral",
+};
+
 export const unidades = dados.unidades as Record<string, Unidade>;
 export const bairros = dados.bairros as Record<string, Bairro>;
 export const slots = dados.slots as Slot[];
@@ -262,4 +276,70 @@ export function ociosasNoBairro(bairroFamilia: string, grupamento: string, horar
   return (porBairroSlot.get(`${bairroFamilia}|${grupamento}|${horario}`) ?? []).filter(
     (s) => s.f === 0,
   );
+}
+
+// ---------------------------------------------------------------- identificação da unidade
+
+/**
+ * O tipo da unidade vem do prefixo do nome, que é como a própria SME nomeia a rede:
+ * EDI, CM, EM e CIEP são unidades da rede própria; CP é creche parceira (conveniada).
+ * Só isso: a base não traz um campo de rede, e inventar um seria afirmar o que não se sabe.
+ * A expansão de "CP" merece confirmação com a SME antes de ir para produção.
+ */
+const TIPOS: Record<string, { rotulo: string; rede: string }> = {
+  EDI: { rotulo: "Espaço de Desenvolvimento Infantil", rede: "Rede municipal" },
+  CM: { rotulo: "Creche Municipal", rede: "Rede municipal" },
+  EM: { rotulo: "Escola Municipal", rede: "Rede municipal" },
+  CIEP: { rotulo: "CIEP", rede: "Rede municipal" },
+  CP: { rotulo: "Creche parceira", rede: "Rede parceira" },
+};
+
+export function tipoDaUnidade(nome: string) {
+  const sigla = nome.split(" ")[0];
+  return (
+    TIPOS[sigla] ?? { rotulo: "Unidade de educação infantil", rede: "Rede municipal" }
+  );
+}
+
+/** Turmas e turnos que a unidade ofereceu no processo corrente. */
+export function ofertaDaUnidade(u: string) {
+  const oferta = new Map<string, string[]>();
+  for (const s of slots) {
+    if (s.a !== ANO || s.u !== u) continue;
+    const turnos = oferta.get(s.g) ?? [];
+    if (!turnos.includes(s.h)) turnos.push(s.h);
+    oferta.set(s.g, turnos);
+  }
+  return [...oferta.entries()]
+    .map(([grupamento, turnos]) => ({ grupamento, turnos: turnos.sort() }))
+    .sort((a, b) => a.grupamento.localeCompare(b.grupamento, "pt-BR"));
+}
+
+/** Coordenada usada no mapa: a da unidade quando existe, o centro do bairro quando não. */
+export function coordenadaDaUnidade(u: string) {
+  const un = unidades[u];
+  if (!un) return null;
+  const lat = un.lat ?? bairros[un.bk ?? ""]?.lat;
+  const lng = un.lng ?? bairros[un.bk ?? ""]?.lng;
+  return lat == null || lng == null ? null : { lat, lng };
+}
+
+/**
+ * A base grava nome de unidade e de bairro em caixa alta. Caixa alta em bloco lê mais
+ * devagar e grita na tela, então exibimos em caixa de título, preservando as siglas da
+ * rede e os numerais romanos que fazem parte do nome.
+ */
+const SIGLAS = new Set(["EDI", "CM", "EM", "CP", "CIEP", "CEI", "II", "III", "IV", "V", "VI"]);
+const MINUSCULAS = new Set(["da", "de", "do", "das", "dos", "e", "em", "a", "o", "no", "na"]);
+
+export function nomeExibicao(bruto: string) {
+  const palavras = bruto.trim().toLowerCase().split(/\s+/);
+  return palavras
+    .map((p, i) => {
+      const alta = p.toUpperCase();
+      if (SIGLAS.has(alta)) return alta;
+      if (i > 0 && MINUSCULAS.has(p)) return p;
+      return p.replace(/^[a-zà-ú]/, (c) => c.toUpperCase());
+    })
+    .join(" ");
 }

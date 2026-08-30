@@ -1,65 +1,95 @@
 import type { Metadata } from "next";
-import { Archivo, IBM_Plex_Sans } from "next/font/google";
+import { Public_Sans } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 import marca from "@/public/logo-sme-rio.png";
-import marcaBranca from "@/public/logo-sme-rio-branco.png";
+import { BotaoPrimarioLateral, NavegacaoInferior, NavegacaoLateral } from "./navegacao";
+import { ANO } from "@/lib/creche";
 
-// Archivo: grotesca robusta, com ar de sinalizacao publica. Carrega o display.
-// IBM Plex Sans: humanista, desenhada para leitura densa e formulario.
-const display = Archivo({
-  variable: "--fonte-display",
+// Public Sans: a familia do style board. Humanista, desenhada para interface de governo
+// (e a face do U.S. Web Design System), le bem em numero tabular e em texto denso.
+const publicSans = Public_Sans({
+  variable: "--fonte-public-sans",
   subsets: ["latin"],
-  weight: ["600", "700"],
-});
-
-const corpo = IBM_Plex_Sans({
-  variable: "--fonte-corpo",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const MARCA_ALT = "Prefeitura do Rio, Secretaria Municipal de Educação";
 
 export const metadata: Metadata = {
-  title: "Escolha da creche · Inscrição Creche Rio",
+  title: "Inscrição Creche Rio",
   description:
     "Veja quantas famílias estão na fila de cada creche e quantas crianças a creche chamou no ano passado, para escolher com chance real.",
 };
 
+/** Marca da plataforma: logo oficial da SME + o nome do servico embaixo (secao 12). */
+function Marca({ compacta = false }: { compacta?: boolean }) {
+  return (
+    <Link
+      href="/"
+      aria-label="Início"
+      className={compacta ? "flex items-center gap-3" : "block"}
+    >
+      <Image src={marca} alt={MARCA_ALT} priority className="h-8 w-auto" />
+      <span className={compacta ? "border-l border-linha pl-3" : "mt-3 block"}>
+        <span className="block text-title-sm text-titulo">Inscrição Creche</span>
+        <span className="block text-body-sm text-apoio">Educação Municipal</span>
+      </span>
+    </Link>
+  );
+}
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="pt-BR" className={`${display.variable} ${corpo.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">
-        {/* Cabecalho institucional: a marca oficial da SME assina a ferramenta. */}
-        <header className="bg-papel">
-          <div className="h-1.5 bg-tinta" />
-          <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-4 border-b border-linha px-4 py-3 sm:px-6">
-            <Link href="/" aria-label="Início">
-              <Image src={marca} alt={MARCA_ALT} priority className="h-8 w-auto sm:h-10" />
-            </Link>
-            <p className="hidden text-right text-xs font-semibold uppercase leading-tight tracking-wider text-tinta-fraca sm:block">
-              Inscrição
-              <br />
-              Creche Rio
-            </p>
-          </div>
-        </header>
+    <html lang="pt-BR" className={`${publicSans.variable} h-full antialiased`}>
+      <body className="min-h-full">
+        <a
+          href="#conteudo"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primaria focus:px-4 focus:py-2 focus:text-title-sm focus:text-white"
+        >
+          Ir para o conteúdo
+        </a>
 
-        {children}
-
-        {/* Rodape institucional. */}
-        <footer className="mt-auto bg-tinta">
-          <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-            <Image src={marcaBranca} alt={MARCA_ALT} className="h-8 w-auto" />
-            <p className="text-xs leading-relaxed text-papel/80">
-              Secretaria Municipal de Educação
-              <br />
-              Prefeitura da Cidade do Rio de Janeiro
+        <div className="lg:flex">
+          {/* Sidebar de 240px, sem borda: quem a separa do conteudo e o fundo do canvas. */}
+          <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-papel px-5 py-6 lg:flex">
+            <Marca />
+            <div className="mt-6">
+              <BotaoPrimarioLateral />
+            </div>
+            <NavegacaoLateral />
+            <p className="mt-auto text-body-sm text-discreto">
+              Dados do processo de Inscrição Creche {ANO} da Secretaria Municipal de Educação.
             </p>
+          </aside>
+
+          <div className="flex min-h-screen w-full flex-col">
+            {/* Abaixo de lg a marca vira barra de topo e a navegacao desce para o rodape. */}
+            <header className="sticky top-0 z-20 border-b border-linha bg-papel px-4 py-3 lg:hidden">
+              <Marca compacta />
+            </header>
+
+            <main id="conteudo" className="flex-1 p-4 sm:p-5">
+              {children}
+            </main>
+
+            {/* Rodape institucional (secao 5.13). */}
+            <footer className="border-t border-trilho bg-fundo px-4 py-4 sm:px-6">
+              <div className="mx-auto flex w-full max-w-360 flex-col gap-2 text-body-sm sm:flex-row sm:items-center sm:justify-between">
+                <p className="font-bold text-primaria">Prefeitura do Rio de Janeiro</p>
+                <p className="text-discreto">
+                  Secretaria Municipal de Educação · Dados públicos de {ANO}
+                </p>
+                <Link href="/diagnostico" className="text-apoio underline-offset-4 hover:underline">
+                  Como estes números são medidos
+                </Link>
+              </div>
+            </footer>
+
+            <NavegacaoInferior />
           </div>
-        </footer>
+        </div>
       </body>
     </html>
   );

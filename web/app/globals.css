@@ -1,52 +1,150 @@
 @import "tailwindcss";
 
-/* Identidade visual da Prefeitura do Rio / Secretaria Municipal de Educacao.
-   O azul institucional #193257 e o azul-claro #55B8E9 do brasao foram tirados do
-   arquivo oficial da marca (educacao.prefeitura.rio/identidade-visual). Todo o
-   resto do sistema deriva desses dois.
+/* Design system "Institutional Humanist Desktop" — docs/refs-paginas/design-system.md.
+   As quatro cores-ancora (#0B4EA2, #062E5F, #893800, #75777E) e a familia Public Sans
+   vem do style board; as rampas e a escala tipografica foram derivadas das telas de
+   referencia (Unidades Recomendadas e Detalhe da Unidade).
 
-   Ferramenta de servico publico lida no celular, muitas vezes com pressa e no sol:
-   contraste alto, alvos grandes, nada de cinza sobre cinza. */
+   Credibilidade de governo sem frieza de formulario: azul dominante, superficie branca
+   sobre fundo neutro frio, separacao por borda e nao por sombra, densidade media. */
 @theme {
-  --color-tinta: #193257; /* azul institucional: texto e estrutura */
-  --color-tinta-forte: #102340; /* estado pressionado dos botoes */
-  --color-tinta-fraca: #4d6379; /* texto de apoio, 6,2:1 no papel branco */
+  /* ---- cor: ancoras e rampas ---------------------------------------- */
+  --color-primaria: #0b4ea2; /* acao, link, estado ativo, barra de dado */
+  --color-primaria-50: #eff5fd;
+  --color-primaria-100: #dceafa;
+  --color-primaria-300: #8fbbec; /* borda em hover, pin padrao no mapa */
+  --color-primaria-forte: #083e80; /* hover do botao primario */
+  --color-primaria-clara: #e8f0fb; /* superficie de acento, chip, nav ativa */
 
-  --color-marca: #55b8e9; /* azul-claro do brasao: acento, nunca texto */
-  --color-marca-clara: #e7f4fc;
+  --color-marinho: #062e5f; /* titulo, botao invertido, badge de enfase */
+  --color-marinho-forte: #041f41;
+  --color-marinho-corpo: #0c3b69; /* corpo de texto sobre acento claro */
 
-  --color-papel: #ffffff;
-  --color-papel-fundo: #eef3f8;
-  --color-linha: #d0dae6;
+  --color-alerta: #893800; /* atencao operacional. uso escasso */
+  --color-alerta-clara: #fbe7d8;
 
-  /* sinal, nao enfeite: dizem se a chamada alcanca a fila */
-  --color-vaga: #0b6e4f;
-  --color-vaga-clara: #e4f1eb;
-  --color-meia: #8a6412;
-  --color-meia-clara: #fbf0d8;
-  --color-espera: #a53a17;
-  --color-espera-clara: #fbe9e2;
+  --color-vaga: #147d4b; /* extensao do board: disponibilidade real, so isso */
+  --color-vaga-clara: #e7f4ec;
 
-  --font-display: var(--fonte-display), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--fonte-corpo), ui-sans-serif, system-ui, sans-serif;
+  --color-erro: #b3261e; /* recusa e falha. nunca decorativo */
+  --color-erro-clara: #fdecea;
+
+  /* ---- cor: papeis semanticos --------------------------------------- */
+  --color-papel: #ffffff; /* card, sidebar, input */
+  --color-fundo: #f4f6fa; /* canvas atras dos cards */
+  --color-linha: #e3e8ef; /* borda de card e de input */
+  --color-linha-forte: #cfd1d5; /* divisor, botao desabilitado */
+  --color-trilho: #e6e8eb; /* trilho vazio de barra, botao secundario */
+  --color-desabilitado: #b1b3b8;
+
+  --color-tinta: #111827; /* corpo principal */
+  --color-titulo: #062e5f; /* titulo de secao e de card, nunca preto puro */
+  --color-apoio: #5b5f68; /* endereco, metadado, legenda */
+  --color-discreto: #75777e; /* rodape e placeholder. proibido abaixo de 14px */
+  --color-chip: #434750; /* texto de chip inativo */
+
+  /* ---- tipografia ---------------------------------------------------- */
+  --font-sans:
+    var(--fonte-public-sans), -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --text-display-lg: 48px; /* numero grande de posicao na fila */
+  --text-display-lg--line-height: 56px;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
+
+  --text-headline-lg: 32px; /* titulo de pagina */
+  --text-headline-lg--line-height: 40px;
+  --text-headline-lg--letter-spacing: -0.01em;
+  --text-headline-lg--font-weight: 700;
+
+  --text-headline-md: 24px; /* "Unidades Recomendadas" */
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--letter-spacing: -0.01em;
+  --text-headline-md--font-weight: 700;
+
+  --text-headline-sm: 20px; /* nome da unidade no detalhe */
+  --text-headline-sm--line-height: 28px;
+  --text-headline-sm--letter-spacing: -0.005em;
+  --text-headline-sm--font-weight: 600;
+
+  --text-title-lg: 18px; /* titulo de card */
+  --text-title-lg--line-height: 26px;
+  --text-title-lg--font-weight: 600;
+
+  --text-title-md: 16px; /* nome da unidade no card de lista */
+  --text-title-md--line-height: 24px;
+  --text-title-md--font-weight: 600;
+
+  --text-title-sm: 14px; /* item de nav, rotulo de botao */
+  --text-title-sm--line-height: 20px;
+  --text-title-sm--font-weight: 600;
+
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 26px;
+  --text-body-md: 14px;
+  --text-body-md--line-height: 22px;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 20px;
+
+  --text-label-lg: 13px; /* chip, botao pequeno */
+  --text-label-lg--line-height: 16px;
+  --text-label-lg--letter-spacing: 0.01em;
+  --text-label-lg--font-weight: 500;
+
+  --text-label-md: 12px; /* chip de distancia, badge */
+  --text-label-md--line-height: 16px;
+  --text-label-md--letter-spacing: 0.02em;
+  --text-label-md--font-weight: 500;
+
+  --text-label-sm: 11px; /* rotulo de secao, eixo do grafico */
+  --text-label-sm--line-height: 16px;
+  --text-label-sm--letter-spacing: 0.04em;
+  --text-label-sm--font-weight: 600;
+
+  /* ---- raio ----------------------------------------------------------- */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* ---- elevacao: o sistema e de borda, sombra so no que flutua -------- */
+  --shadow-sm: 0 1px 2px rgba(6, 46, 95, 0.06);
+  --shadow-md: 0 4px 12px rgba(6, 46, 95, 0.1);
+  --shadow-lg: 0 12px 32px rgba(6, 46, 95, 0.16);
+
+  /* ---- movimento ------------------------------------------------------ */
+  --ease-rapido: cubic-bezier(0.4, 0, 1, 1);
+  --ease-base: cubic-bezier(0.2, 0, 0, 1);
+
+  /* layout (secao 4): sidebar 240px = w-60, coluna de lista 360px = w-90,
+     gutter 16px, padding do canvas 20px, largura maxima de conteudo 1440px. */
 }
 
 body {
-  background: var(--color-papel-fundo);
+  background: var(--color-fundo);
   color: var(--color-tinta);
   font-family: var(--font-sans);
 }
 
-/* Numeros sao a materia-prima desta tela: sempre tabulares, para as colunas baterem. */
+/* Numeros sao a materia-prima destas telas: sempre tabulares, para as colunas baterem. */
 .num {
   font-variant-numeric: tabular-nums;
 }
 
-/* Foco visivel de verdade: teclado e leitor de tela sao parte do piso de qualidade. */
-:where(a, button, select, summary, input):focus-visible {
-  outline: 2px solid var(--color-tinta);
+/* Foco visivel de verdade, em tudo que recebe teclado. Nunca outline: none. */
+:where(a, button, select, summary, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-primaria);
   outline-offset: 2px;
   border-radius: 3px;
+}
+
+/* Campo de busca do design system: borda que acende com halo de 3px. */
+.campo-busca:focus-within {
+  border-color: var(--color-primaria);
+  box-shadow: 0 0 0 3px rgba(11, 78, 162, 0.12);
+}
+.campo-busca:focus-within input:focus-visible {
+  outline: none;
 }
 
 summary {
@@ -57,16 +155,37 @@ summary::-webkit-details-marker {
   display: none;
 }
 
-/* O triangulo que gira ao abrir a ficha. */
+/* O triangulo que gira ao abrir o historico. */
 .seta {
-  transition: transform 160ms ease;
+  transition: transform 200ms var(--ease-base);
 }
 details[open] .seta {
   transform: rotate(90deg);
 }
 
+/* As barras do grafico crescem uma vez, na entrada. Nunca em loop. */
+@keyframes cresce {
+  from {
+    transform: scaleX(0);
+  }
+}
+.barra-cresce {
+  transform-origin: left;
+  animation: cresce 320ms var(--ease-base) both;
+}
+
+/* A linha de filtros rola sem quebrar; a barra some para nao roubar altura. */
+.rolagem-filtros {
+  scrollbar-width: none;
+}
+.rolagem-filtros::-webkit-scrollbar {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .seta {
+  .seta,
+  .barra-cresce {
     transition: none;
+    animation: none;
   }
 }
