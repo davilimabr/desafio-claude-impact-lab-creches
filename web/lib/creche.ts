@@ -174,11 +174,14 @@ export function distanciaKm(bairroFamilia: string, unidade: string): number | nu
 export const PESOS = { proximidade: 0.4, ociosidade: 0.4, estabilidade: 0.2 };
 export const RAIO_PADRAO_KM = 3;
 
-export type Recomendacao = {
+export type Candidata = {
   unidade: string;
   nome: string;
   bairro: string | null;
-  distanciaKm: number | null;
+  /** menor distância entre a unidade e os pontos de referência da família */
+  distanciaKm: number;
+  /** de qual ponto de referência ela está mais perto */
+  pontoMaisProximo: string;
   agregado: Agregado;
   faixa: Faixa;
   score: number;
@@ -186,29 +189,42 @@ export type Recomendacao = {
 };
 
 /**
- * Ordena alternativas por proximidade, ociosidade e estabilidade.
- * Os pesos são públicos de propósito: recomendação em serviço público
- * cujo critério ninguém consegue ver é caixa-preta, não recomendação.
+ * Todas as unidades que atendem o grupamento/turno dentro do raio de algum ponto de
+ * referência da família — as congestionadas inclusive.
+ *
+ * Esconder as lotadas seria decidir pela família. O ponto do produto é o contrário:
+ * mostrar tudo que existe perto, com o sinal de chance à vista, para que a escolha
+ * seja informada em vez de às cegas.
+ *
+ * A ordem vem de proximidade, ociosidade e estabilidade. Os pesos são públicos de
+ * propósito: recomendação em serviço público cujo critério ninguém vê é caixa-preta.
  */
-export function recomendar(opts: {
-  bairroFamilia: string;
+export function candidatas(opts: {
+  pontos: string[];
   grupamento: string;
   horario: string;
-  jaEscolhidas?: string[];
   raioKm?: number;
   limite?: number;
-}): Recomendacao[] {
-  const { bairroFamilia, grupamento, horario } = opts;
+}): Candidata[] {
+  const { grupamento, horario } = opts;
   const raio = opts.raioKm ?? RAIO_PADRAO_KM;
-  const excluir = new Set(opts.jaEscolhidas ?? []);
+  const pontos = opts.pontos.filter((p) => bairros[p]);
+  if (!pontos.length) return [];
 
-  const candidatos: Recomendacao[] = [];
+  const out: Candidata[] = [];
   for (const s of slots) {
     if (s.a !== ANO || s.g !== grupamento || s.h !== horario) continue;
-    if (excluir.has(s.u)) continue;
 
-    const d = distanciaKm(bairroFamilia, s.u);
-    if (d === null || d > raio) continue;
+    let melhor = Infinity;
+    let origem = pontos[0];
+    for (const p of pontos) {
+      const d = distanciaKm(p, s.u);
+      if (d !== null && d < melhor) {
+        melhor = d;
+        origem = p;
+      }
+    }
+    if (melhor > raio) continue;
 
     const ag = agregado(s.u, grupamento, horario);
     if (!ag) continue;
@@ -216,16 +232,17 @@ export function recomendar(opts: {
     // Sem histórico de chamada não há como afirmar que a vaga existe.
     if (ag.profundidadeMediana <= 0 && ag.confirmadosAtual === 0) continue;
 
-    const proximidade = 1 - d / raio;
+    const proximidade = 1 - melhor / raio;
     const denom = Math.max(1, ag.profundidadeMediana);
     const ociosidade = Math.max(0, 1 - ag.filaAtual / denom);
     const estabilidade = ag.anosObservados ? ag.anosComFilaZero / ag.anosObservados : 0;
 
-    candidatos.push({
+    out.push({
       unidade: s.u,
       nome: unidades[s.u]?.n ?? s.u,
       bairro: unidades[s.u]?.b ?? null,
-      distanciaKm: d,
+      distanciaKm: melhor,
+      pontoMaisProximo: origem,
       agregado: ag,
       faixa: faixaDeChance(ag),
       score:
@@ -236,8 +253,8 @@ export function recomendar(opts: {
     });
   }
 
-  candidatos.sort((a, b) => b.score - a.score);
-  return candidatos.slice(0, opts.limite ?? 6);
+  out.sort((a, b) => b.score - a.score);
+  return opts.limite ? out.slice(0, opts.limite) : out;
 }
 
 /** Slots ociosos (fila zero) no bairro da família, para o mapa e o diagnóstico. */
