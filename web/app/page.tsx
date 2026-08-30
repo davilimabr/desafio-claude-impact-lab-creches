@@ -8,7 +8,6 @@ import {
   grupamentos,
   listaBairros,
   rotuloFaixa,
-  stats,
   turnos,
   unidades,
   type Agregado,
@@ -124,11 +123,9 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
           Escolha até {MAX_OPCOES} creches
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-slate-600">
-          Em {ANO}, <strong>{stats.criancas_sem_vaga.toLocaleString("pt-BR")}</strong> crianças
-          terminaram o processo sem nenhuma vaga.{" "}
-          <strong>{stats.sem_vaga_com_ociosa_no_bairro.toLocaleString("pt-BR")}</strong> delas tinham,
-          a menos de {stats.raio_km} km de casa, uma creche do mesmo grupamento e turno que
-          procuravam — e sem ninguém na fila. Esta tela existe para isso não se repetir.
+          Você pode indicar até {MAX_OPCOES} creches, na ordem da sua preferência. Para cada uma,
+          mostramos quantas famílias estão esperando e quantas a creche chamou no ano passado — para
+          você saber onde tem chance de verdade.
         </p>
       </header>
 
@@ -242,9 +239,8 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
           </ol>
           {restantes > 0 && (
             <p className="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
-              Ainda pode escolher mais {restantes}. Usar todas as {MAX_OPCOES} aumenta sua chance —
-              em {ANO}, {stats.sem_vaga_com_ociosa_e_opcao_sobrando.toLocaleString("pt-BR")} crianças
-              ficaram sem vaga tendo opções em branco.
+              Ainda pode escolher mais {restantes}. Deixar opções em branco só diminui sua chance —
+              elas não custam nada e não atrapalham a sua primeira escolha.
             </p>
           )}
         </section>
@@ -322,6 +318,12 @@ export default async function Page({ searchParams }: { searchParams: Params }) {
         <p>
           A distância parte do centro do bairro de referência (a base é anonimizada, sem endereço do
           responsável): precisão de cerca de 1 km.
+        </p>
+        <p>
+          <Link href="/diagnostico" className="underline hover:text-slate-700">
+            Ver o diagnóstico da rede
+          </Link>{" "}
+          — os números que motivaram esta ferramenta.
         </p>
       </footer>
     </main>
